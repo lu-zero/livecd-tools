@@ -114,7 +114,7 @@ get_video_cards() {
 			fi
 		elif [ -n "${ATI}" ]
 		then
-			ATI_CARD=$(echo ${ATI} | awk 'BEGIN {RS=" "} /(R|RV|RS)[0-9]+/ {print $1}')
+			ATI_CARD=$(echo ${ATI} | awk 'BEGIN {RS=" "} /(R|RV|RS)[0-9]+/ {print $1}' | sed -e 's/[^0-9]//g')
 			if [ $(echo ${ATI_CARD} | grep S) ]
 			then
 				ATI_CARD_S=$(echo ${ATI_CARD} | cut -dS -f2)
