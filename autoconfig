@@ -1,7 +1,4 @@
 #!/sbin/runscript
-# Copyright 1999-2005 Gentoo Foundation
-# Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo/src/livecd-tools/autoconfig,v 1.69 2006/09/20 22:08:04 wolf31o2 Exp $
 
 DHCP="yes"
 DETECT="yes"
@@ -363,9 +360,10 @@ start() {
 			start_service hotplug
 		else
 			unpack_firmware
+			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
 		fi
 	else
-		ewarn "Hotplug disabled via cmdline ..."
+		ewarn "Hotplug/Coldplug disabled via cmdline ..."
 	fi
 
 	[ "${DETECT}" = "no" ] && DHCP="no"

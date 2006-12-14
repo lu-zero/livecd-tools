@@ -1,7 +1,4 @@
 #!/bin/bash
-# Copyright 1999-1999-2005 Gentoo Foundation
-# Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo/src/livecd-tools/x-setup,v 1.16 2006/08/01 19:38:36 wolf31o2 Exp $
 
 # Check for an xorg.conf
 if [ ! -e /etc/X11/xorg.conf ]

@@ -1,7 +1,4 @@
 #!/bin/bash
-# Copyright 1999-2005 Gentoo Foundation
-# Distributed under the terms of the GNU General Public License v2
-# $Header: /var/cvsroot/gentoo/src/livecd-tools/net-setup,v 1.19 2006/05/30 20:20:11 wolf31o2 Exp $
 
 if [ -f /sbin/livecd-functions.sh ]
 then

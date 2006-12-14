@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Global Variables:
-#    CDBOOT			-- is booting off CD
-#    LIVECD_CONSOLE		-- console that is specified to kernel commandline 
-#				-- (ttyS0, tty1, etc). Only defined if passed to kernel
-#    LIVECD_CONSOLE_BAUD	-- console baudrate specified
-#    LIVECD_CONSOLE_PARITY	-- console parity specified
-#    LIVECD_CONSOLE_DATABITS	-- console databits specified
+#    CDBOOT                  -- is booting off CD
+#    LIVECD_CONSOLE          -- console that is specified on commandline 
+#                            -- (ttyS0, etc) Only defined if passed to kernel
+#    LIVECD_CONSOLE_BAUD     -- console baudrate specified
+#    LIVECD_CONSOLE_PARITY   -- console parity specified
+#    LIVECD_CONSOLE_DATABITS -- console databits specified
 
 [[ ${RC_GOT_FUNCTIONS} != "yes" ]] && source /sbin/functions.sh
 
