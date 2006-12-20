@@ -351,6 +351,8 @@ start() {
 
 	if [ "${HOTPLUG}" = "yes" ]
 	then
+		# First off, we want hotplug/coldplug enabled, so let's re-enable it
+		sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
 		# Check whether we should be using hotplug or coldplug
 		if [ -x /etc/init.d/coldplug ]
 		then
