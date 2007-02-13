@@ -349,10 +349,13 @@ start() {
 		fi
 	fi
 
+	# First off, we want hotplug/coldplug enabled, so let's re-enable it.  We do
+	# this even if we aren't startup up the hotplug/coldplug services for the
+	# installer.
+	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
+	# Now, we check if we're supposed to run a coldplug script.
 	if [ "${HOTPLUG}" = "yes" ]
 	then
-		# First off, we want hotplug/coldplug enabled, so let's re-enable it
-		sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
 		# Check whether we should be using hotplug or coldplug
 		if [ -x /etc/init.d/coldplug ]
 		then
@@ -379,7 +382,6 @@ start() {
 			if [ "${DHCP}" = "yes" ]
 			then
 				einfo "Network device ${HILITE}${nics}${NORMAL} detected, DHCP broadcasting for IP ..."
-				dhcpcd -n -h $(hostname) &
 			fi
 		done
 	else
@@ -398,7 +400,6 @@ start() {
 				&& sndmsg="${sndmsg}              driver = ${SOUND_DRIVER}\n"
 
 			einfo "${sndmsg}"
-
 
 			if [ -x /etc/init.d/alsasound ]
 			then
