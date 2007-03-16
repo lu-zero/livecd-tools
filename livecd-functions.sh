@@ -497,12 +497,12 @@ livecd_read_commandline() {
 		case "${x}" in
 			cdroot)
 				CDBOOT="yes"
-				RC_NO_UMOUNTS=^(/|/dev|/dev/pts|/lib/rcscripts/init.d|/proc|/proc/.*|/sys|/mnt/livecd|/newroot)$
+				RC_NO_UMOUNTS="^(/|/dev|/dev/pts|/lib/rcscripts/init.d|/proc|/proc/.*|/sys|/mnt/livecd|/newroot)$"
 				export CDBOOT RC_NO_UMOUNTS
 			;;
 			cdroot\=*)
 				CDBOOT="yes"
-				RC_NO_UMOUNTS=^(/|/dev|/dev/pts|/lib/rcscripts/init.d|/proc|/proc/.*|/sys|/mnt/livecd|/newroot)$
+				RC_NO_UMOUNTS="^(/|/dev|/dev/pts|/lib/rcscripts/init.d|/proc|/proc/.*|/sys|/mnt/livecd|/newroot)$"
 				export CDBOOT RC_NO_UMOUNTS
 			;;
 			console\=*)
