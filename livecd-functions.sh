@@ -8,7 +8,7 @@
 #    LIVECD_CONSOLE_PARITY   -- console parity specified
 #    LIVECD_CONSOLE_DATABITS -- console databits specified
 
-[[ ${RC_GOT_FUNCTIONS} != "yes" ]] && source /sbin/functions.sh
+[[ ${RC_GOT_FUNCTIONS} != "yes" ]] && [[ -e /etc/init.d/functions.sh ]] && source /etc/init.d/functions.sh
 
 livecd_parse_opt() {
 	case "$1" in
