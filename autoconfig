@@ -311,6 +311,9 @@ start() {
 		modprobe button >/dev/null 2>&1
 		modprobe battery >/dev/null 2>&1
 		modprobe ac >/dev/null 2>&1
+		modprobe thermal >/dev/null 2>&1
+		modprobe video >/dev/null 2>&1
+		modprobe dock >/dev/null 2>&1
 		[ -x /etc/init.d/acpid ] && start_service acpid
 		eend
 	else
