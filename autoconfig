@@ -223,6 +223,29 @@ detect_sparc() {
 start() {
 	echo "0" > /proc/sys/kernel/printk
 	get_config
+
+	# First off, we want hotplug/coldplug enabled, so let's re-enable it.
+	# We do this even if we aren't startup up the hotplug/coldplug
+	# services for the installer.
+	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
+	# Now, we check if we're supposed to run a coldplug script.
+	if [ "${HOTPLUG}" = "yes" ]
+	then
+		# Check whether we should be using hotplug or coldplug
+		if [ -x /etc/init.d/coldplug ]
+		then
+			start_service coldplug
+		elif [ -x /etc/init.d/hotplug ]
+		then
+			start_service hotplug
+		else
+			unpack_firmware
+			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
+		fi
+	else
+		ewarn "Hotplug/Coldplug disabled via cmdline ..."
+	fi
+
 	if [ "${DETECT}" = "yes" ]
 	then
 		ebegin "Hardware detection started"
@@ -347,28 +370,6 @@ start() {
 			[ "${GPM}" = "yes" ] \
 				&& [ -x /etc/init.d/gpm ] && start_service gpm
 		fi
-	fi
-
-	# First off, we want hotplug/coldplug enabled, so let's re-enable it.  We do
-	# this even if we aren't startup up the hotplug/coldplug services for the
-	# installer.
-	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
-	# Now, we check if we're supposed to run a coldplug script.
-	if [ "${HOTPLUG}" = "yes" ]
-	then
-		# Check whether we should be using hotplug or coldplug
-		if [ -x /etc/init.d/coldplug ]
-		then
-			start_service coldplug
-		elif [ -x /etc/init.d/hotplug ]
-		then
-			start_service hotplug
-		else
-			unpack_firmware
-			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
-		fi
-	else
-		ewarn "Hotplug/Coldplug disabled via cmdline ..."
 	fi
 
 	[ "${DETECT}" = "no" ] && DHCP="no"
