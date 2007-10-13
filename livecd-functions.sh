@@ -28,7 +28,7 @@ livecd_check_root() {
 
 livecd_get_cmdline() {
 	echo "0" > /proc/sys/kernel/printk
-	CMDLINE="$(cat /proc/cmdline)"
+	CMDLINE=$(cat /proc/cmdline)
 	export CMDLINE
 }
 
@@ -80,9 +80,9 @@ nv_no_gl() {
 }
 
 get_video_cards() {
-	[ -x /sbin/lspci ] && VIDEO_CARDS="$(/sbin/lspci | grep ' VGA ')"
-	[ -x /usr/sbin/lspci ] && VIDEO_CARDS="$(/usr/sbin/lspci | grep ' VGA ')"
-	NUM_CARDS="$(echo ${VIDEO_CARDS} | wc -l)"
+	[ -x /sbin/lspci ] && VIDEO_CARDS=$(/sbin/lspci | grep ' VGA ')
+	[ -x /usr/sbin/lspci ] && VIDEO_CARDS=$(/usr/sbin/lspci | grep ' VGA ')
+	NUM_CARDS=$(echo ${VIDEO_CARDS} | wc -l)
 	if [ ${NUM_CARDS} -eq 1 ]
 	then
 		NVIDIA=$(echo ${VIDEO_CARDS} | grep "nVidia Corporation")
@@ -147,19 +147,19 @@ livecd_config_wireless() {
 	[ -x /usr/sbin/iwconfig ] && iwconfig=/usr/sbin/iwconfig
 	[ -x /sbin/iwconfig ] && iwconfig=/sbin/iwconfig
 	dialog --title "SSID" --inputbox "Please enter your SSID, or leave blank for selecting the nearest open network" 20 50 2> ${iface}.SSID
-	SSID="$(cat ${iface}.SSID)"
+	SSID=$(cat ${iface}.SSID)
 	if [ -n "${SSID}" ]
 	then
 		dialog --title "WEP (Part 1)" --menu "Does your network use encryption?" 20 60 7 1 "Yes" 2 "No" 2> ${iface}.WEP
-		WEP="$(cat ${iface}.WEP)"
+		WEP=$(cat ${iface}.WEP)
 		case ${WEP} in
 			1)
 				dialog --title "WEP (Part 2)" --menu "Are you entering your WEP key in HEX or ASCII?" 20 60 7 1 "HEX" 2 "ASCII" 2> ${iface}.WEPTYPE
-				WEP_TYPE="$(cat ${iface}.WEPTYPE)"
+				WEP_TYPE=$(cat ${iface}.WEPTYPE)
 				case ${WEP_TYPE} in
 					1)
 						dialog --title "WEP (Part 3)" --inputbox "Please enter your WEP key in the form of XXXX-XXXX-XX for 64-bit or XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX for 128-bit" 20 50 2> ${iface}.WEPKEY
-						WEP_KEY="$(cat ${iface}.WEPKEY)"
+						WEP_KEY=$(cat ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
 							${iwconfig} ${iface} essid "${SSID}"
@@ -168,7 +168,7 @@ livecd_config_wireless() {
 					;;
 					2)
 						dialog --title "WEP (Part 3)" --inputbox "Please enter your WEP key in ASCII form.  This should be 5 or 13 characters for either 64-bit or 128-bit encryption, repectively" 20 50 2> ${iface}.WEPKEY
-						WEP_KEY="$(cat ${iface}.WEPKEY)"
+						WEP_KEY=$(cat ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
 							${iwconfig} ${iface} essid "${SSID}"
@@ -187,26 +187,27 @@ livecd_config_wireless() {
 
 livecd_write_wireless_conf() {
 	cd /tmp/setup.opts
-	SSID="$(cat ${iface}.SSID)"
+	SSID=$(cat ${iface}.SSID)
 	if [ -n "${SSID}" ]
 	then
-		echo "# This wireless configuration file was built by net-setup" > /etc/conf.d/wireless
-		WEP="$(cat ${iface}.WEPTYPE)"
+		echo "" >> /etc/conf.d/net
+		echo "# This wireless configuration file was built by net-setup" > /etc/conf.d/net
+		WEP=$(cat ${iface}.WEPTYPE)
 		case ${WEP} in
 			1)
-				WEP_TYPE="$(cat ${iface}.WEPTYPE)"
+				WEP_TYPE=$(cat ${iface}.WEPTYPE)
 				if [ -n "${WEP_TYPE}" ]
 				then
-					WEP_KEY="$(cat ${iface}.WEPKEY)"
+					WEP_KEY=$(cat ${iface}.WEPKEY)
 					if [ -n "${WEP_KEY}" ]
 					then
-						SSID_TRANS="$(echo ${SSID//[![:word:]]/_})"
+						SSID_TRANS=$(echo ${SSID//[![:word:]]/_})
 						case ${WEP_TYPE} in
 							1)
-								echo "key_${SSID_TRANS}=\"${WEP_KEY} enc open\"" >> /etc/conf.d/wireless
+								echo "key_${SSID_TRANS}=\"${WEP_KEY} enc open\"" >> /etc/conf.d/net
 							;;
 							2)
-								echo "key_${SSID_TRANS}=\"s:${WEP_KEY} enc open\"" >> /etc/conf.d/wireless
+								echo "key_${SSID_TRANS}=\"s:${WEP_KEY} enc open\"" >> /etc/conf.d/net
 							;;
 						esac
 					fi
@@ -216,31 +217,31 @@ livecd_write_wireless_conf() {
 				:
 			;;
 		esac
-		echo "preferred_aps=( \"${SSID}\" )" >> /etc/conf.d/wireless
-		echo "associate_order=\"forcepreferredonly\"" >> /etc/conf.d/wireless
+		echo "preferred_aps=( \"${SSID}\" )" >> /etc/conf.d/net
+		echo "associate_order=\"forcepreferredonly\"" >> /etc/conf.d/net
 	fi
 }
 
 livecd_config_ip() {
 	cd /tmp/setup.opts
 	dialog --title "TCP/IP setup" --menu "You can use DHCP to automatically configure a network interface or you can specify an IP and related settings manually. Choose one option:" 20 60 7 1 "Use DHCP to auto-detect my network settings" 2 "Specify an IP address manually" 2> ${iface}.DHCP
-	DHCP="$(cat ${iface}.DHCP)"
+	DHCP=$(cat ${iface}.DHCP)
 	case ${DHCP} in
 		1)
 			/sbin/dhcpcd -n -t 10 -h $(hostname) ${iface} &
 		;;
 		2)
 			dialog --title "IP address" --inputbox "Please enter an IP address for ${iface}:" 20 50 "192.168.1.1" 2> ${iface}.IP
-			IP="$(cat ${iface}.IP)"
-			BC_TEMP="$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255"
+			IP=$(cat ${iface}.IP)
+			BC_TEMP=$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255
 			dialog --title "Broadcast address" --inputbox "Please enter a Broadcast address for ${iface}:" 20 50 "${BC_TEMP}" 2> ${iface}.BC
-			BROADCAST="$(cat ${iface}.BC)"
+			BROADCAST=$(cat ${iface}.BC)
 			dialog --title "Network mask" --inputbox "Please enter a Network Mask for ${iface}:" 20 50 "255.255.255.0" 2> ${iface}.NM
-			NETMASK="$(cat ${iface}.NM)"
+			NETMASK=$(cat ${iface}.NM)
 			dialog --title "Gateway" --inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" 20 50 2> ${iface}.GW
-			GATEWAY="$(cat ${iface}.GW)"
+			GATEWAY=$(cat ${iface}.GW)
 			dialog --title "DNS server" --inputbox "Please enter a name server to use (hit enter for none:)" 20 50 2> ${iface}.DNS
-			DNS="$(cat ${iface}.DNS)"
+			DNS=$(cat ${iface}.DNS)
 			/sbin/ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
 			if [ -n "${GATEWAY}" ]
 			then
@@ -249,7 +250,7 @@ livecd_config_ip() {
 			if [ -n "${DNS}" ]
 			then
 				dialog --title "DNS Search Suffix" --inputbox "Please enter any domains which you would like to search on DNS queries (hit enter for none:)" 20 50 2> ${iface}.SUFFIX
-				SUFFIX="$(cat ${iface}.SUFFIX)"
+				SUFFIX=$(cat ${iface}.SUFFIX)
 				echo "nameserver ${DNS}" > /etc/resolv.conf
 				if [ -n "${SUFFIX}" ]
 				then
@@ -262,17 +263,18 @@ livecd_config_ip() {
 
 livecd_write_net_conf() {
 	cd /tmp/setup.opts
+	echo "" > /etc/conf.d/net
 	echo "# This network configuration was written by net-setup" > /etc/conf.d/net
-	DHCP="$(cat ${iface}.DHCP)"
+	DHCP=$(cat ${iface}.DHCP)
 	case ${DHCP} in
 		1)
 			echo "iface_${iface}=\"dhcp\"" >> /etc/conf.d/net
 		;;
 		2)
-			IP="$(cat ${iface}.IP)"
-			BROADCAST="$(cat ${iface}.BC)"
-			NETMASK="$(cat ${iface}.NM)"
-			GATEWAY="$(cat ${iface}.GW)"
+			IP=$(cat ${iface}.IP)
+			BROADCAST=$(cat ${iface}.BC)
+			NETMASK=$(cat ${iface}.NM)
+			GATEWAY=$(cat ${iface}.GW)
 			if [ -n "${IP}" -a -n "${BROADCAST}" -a -n "${NETMASK}" ]
 			then
 				echo "iface_eth0=\"${IP} broadcast ${BROADCAST} netmask ${NETMASK}\"" >> /etc/conf.d/net
@@ -297,7 +299,7 @@ get_ifdriver() {
 	local iface=$1
 
 	# Example: ../../../bus/pci/drivers/forcedeth (wanted: forcedeth)
-	local if_driver="$(readlink /sys/class/net/${iface}/device/driver)"
+	local if_driver=$(readlink /sys/class/net/${iface}/device/driver)
 	basename ${if_driver}
 }
 
@@ -307,43 +309,46 @@ get_ifbus() {
 	# Example: ../../../bus/pci (wanted: pci)
 	# Example: ../../../../bus/pci (wanted: pci)
 	# Example: ../../../../../../bus/usb (wanted: usb)
-	local if_bus="$(readlink /sys/class/net/${iface}/device/bus)"
+	local if_bus=$(readlink /sys/class/net/${iface}/device/bus)
 	basename ${if_bus}
 }
 
 get_ifproduct() {
 	local iface=$1
-	local bus="$(get_ifbus ${iface})"
+	local bus=$(get_ifbus ${iface})
 	local if_pciaddr
 	local if_devname
 	local if_usbpath
 	local if_usbmanufacturer
 	local if_usbproduct
 
-	if [[ ${bus} == "pci" ]]; then
+	if [[ ${bus} == "pci" ]]
+	then
 		# Example: ../../../devices/pci0000:00/0000:00:0a.0 (wanted: 0000:00:0a.0)
 		# Example: ../../../devices/pci0000:00/0000:00:09.0/0000:01:07.0 (wanted: 0000:01:07.0)
-		if_pciaddr="$(readlink /sys/class/net/${iface}/device)"
-		if_pciaddr="$(basename ${if_pciaddr})"
+		if_pciaddr=$(readlink /sys/class/net/${iface}/device)
+		if_pciaddr=$(basename ${if_pciaddr})
 
 		# Example: 00:0a.0 Bridge: nVidia Corporation CK804 Ethernet Controller (rev a3)
 		#  (wanted: nVidia Corporation CK804 Ethernet Controller)
-		if_devname="$(lspci -s ${if_pciaddr})"
-		if_devname="${if_devname#*: }"
-		if_devname="${if_devname%(rev *)}"
+		if_devname=$(lspci -s ${if_pciaddr})
+		if_devname=${if_devname#*: }
+		if_devname=${if_devname%(rev *)}
 	fi
 
-	if [[ ${bus} == "usb" ]]; then
-		if_usbpath="$(readlink /sys/class/net/${iface}/device)"
-		if_usbpath="/sys/class/net/${iface}/$(dirname ${if_usbpath})"
-		if_usbmanufacturer="$(< ${if_usbpath}/manufacturer)"
-		if_usbproduct="$(< ${if_usbpath}/product)"
+	if [[ ${bus} == "usb" ]]
+	then
+		if_usbpath=$(readlink /sys/class/net/${iface}/device)
+		if_usbpath=/sys/class/net/${iface}/$(dirname ${if_usbpath})
+		if_usbmanufacturer=$(< ${if_usbpath}/manufacturer)
+		if_usbproduct=$(< ${if_usbpath}/product)
 
 		[[ -n ${if_usbmanufacturer} ]] && if_devname="${if_usbmanufacturer} "
 		[[ -n ${if_usbproduct} ]] && if_devname="${if_devname}${if_usbproduct}"
 	fi
 
-	if [[ ${bus} == "ieee1394" ]]; then
+	if [[ ${bus} == "ieee1394" ]]
+	then
 		if_devname="IEEE1394 (FireWire) Network Adapter";
 	fi
 
@@ -352,20 +357,23 @@ get_ifproduct() {
 
 get_ifdesc() {
 	local iface=$1
-	desc="$(get_ifproduct ${iface})"
-	if [[ -n ${desc} ]]; then
+	desc=$(get_ifproduct ${iface})
+	if [[ -n ${desc} ]]
+	then
 		echo $desc
 		return;
 	fi
 
-	desc="$(get_ifdriver ${iface})"
-	if [[ -n ${desc} ]]; then
+	desc=$(get_ifdriver ${iface})
+	if [[ -n ${desc} ]]
+	then
 		echo $desc
 		return;
 	fi
 
-	desc="$(get_ifmac ${iface})"
-	if [[ -n ${desc} ]]; then
+	desc=$(get_ifmac ${iface})
+	if [[ -n ${desc} ]]
+	then
 		echo $desc
 		return;
 	fi
@@ -385,19 +393,20 @@ show_ifmenu() {
 	done
 	IFS="${old_ifs}"
 
-	if ! eval dialog --menu \"Please select the interface that you wish to configure from the list below:\" 0 0 0 $opts 2>iface; then
+	if ! eval dialog --menu "Please select the interface that you wish to configure from the list below:" 0 0 0 $opts 2>iface
+	then
 		exit
 	fi
 
-	iface="$(< iface)"
+	iface=$(< iface)
 }
 
 show_ifconfirm() {
 	local iface=$1
-	local if_mac="$(get_ifmac ${iface})"
-	local if_driver="$(get_ifdriver ${iface})"
-	local if_bus="$(get_ifbus ${iface})"
-	local if_product="$(get_ifproduct ${iface})"
+	local if_mac=$(get_ifmac ${iface})
+	local if_driver=$(get_ifdriver ${iface})
+	local if_bus=$(get_ifbus ${iface})
+	local if_product=$(get_ifproduct ${iface})
 
 	local text="Details for network interface ${iface} are shown below.\n\nInterface name: ${iface}\n"
 	[[ -n ${if_product} ]] && text="${text}Device: ${if_product}\n"
@@ -406,7 +415,8 @@ show_ifconfirm() {
 	[[ -n ${if_bus} ]] && text="${text}Bus type: ${if_bus}\n"
 	text="${text}\nIs this the interface that you wish to configure?"
 
-	if ! dialog --title "Interface details" --yesno "${text}" 15 70; then
+	if ! dialog --title "Interface details" --yesno "${text}" 15 70
+	then
 		result="no"
 	else
 		result="yes"
