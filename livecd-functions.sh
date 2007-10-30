@@ -147,19 +147,19 @@ livecd_config_wireless() {
 	[ -x /usr/sbin/iwconfig ] && iwconfig=/usr/sbin/iwconfig
 	[ -x /sbin/iwconfig ] && iwconfig=/sbin/iwconfig
 	dialog --title "SSID" --inputbox "Please enter your SSID, or leave blank for selecting the nearest open network" 20 50 2> ${iface}.SSID
-	SSID=$(cat ${iface}.SSID)
+	SSID=$(tail -n 1 ${iface}.SSID)
 	if [ -n "${SSID}" ]
 	then
 		dialog --title "WEP (Part 1)" --menu "Does your network use encryption?" 20 60 7 1 "Yes" 2 "No" 2> ${iface}.WEP
-		WEP=$(cat ${iface}.WEP)
+		WEP=$(tail -n 1 ${iface}.WEP)
 		case ${WEP} in
 			1)
 				dialog --title "WEP (Part 2)" --menu "Are you entering your WEP key in HEX or ASCII?" 20 60 7 1 "HEX" 2 "ASCII" 2> ${iface}.WEPTYPE
-				WEP_TYPE=$(cat ${iface}.WEPTYPE)
+				WEP_TYPE=$(tail -n 1 ${iface}.WEPTYPE)
 				case ${WEP_TYPE} in
 					1)
 						dialog --title "WEP (Part 3)" --inputbox "Please enter your WEP key in the form of XXXX-XXXX-XX for 64-bit or XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX for 128-bit" 20 50 2> ${iface}.WEPKEY
-						WEP_KEY=$(cat ${iface}.WEPKEY)
+						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
 							${iwconfig} ${iface} essid "${SSID}"
@@ -168,7 +168,7 @@ livecd_config_wireless() {
 					;;
 					2)
 						dialog --title "WEP (Part 3)" --inputbox "Please enter your WEP key in ASCII form.  This should be 5 or 13 characters for either 64-bit or 128-bit encryption, repectively" 20 50 2> ${iface}.WEPKEY
-						WEP_KEY=$(cat ${iface}.WEPKEY)
+						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
 							${iwconfig} ${iface} essid "${SSID}"
@@ -187,18 +187,18 @@ livecd_config_wireless() {
 
 livecd_write_wireless_conf() {
 	cd /tmp/setup.opts
-	SSID=$(cat ${iface}.SSID)
+	SSID=$(tail -n 1 ${iface}.SSID)
 	if [ -n "${SSID}" ]
 	then
 		echo "" >> /etc/conf.d/net
 		echo "# This wireless configuration file was built by net-setup" > /etc/conf.d/net
-		WEP=$(cat ${iface}.WEPTYPE)
+		WEP=$(tail -n 1 ${iface}.WEPTYPE)
 		case ${WEP} in
 			1)
-				WEP_TYPE=$(cat ${iface}.WEPTYPE)
+				WEP_TYPE=$(tail -n 1 ${iface}.WEPTYPE)
 				if [ -n "${WEP_TYPE}" ]
 				then
-					WEP_KEY=$(cat ${iface}.WEPKEY)
+					WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 					if [ -n "${WEP_KEY}" ]
 					then
 						SSID_TRANS=$(echo ${SSID//[![:word:]]/_})
@@ -225,23 +225,23 @@ livecd_write_wireless_conf() {
 livecd_config_ip() {
 	cd /tmp/setup.opts
 	dialog --title "TCP/IP setup" --menu "You can use DHCP to automatically configure a network interface or you can specify an IP and related settings manually. Choose one option:" 20 60 7 1 "Use DHCP to auto-detect my network settings" 2 "Specify an IP address manually" 2> ${iface}.DHCP
-	DHCP=$(cat ${iface}.DHCP)
+	DHCP=$(tail -n 1 ${iface}.DHCP)
 	case ${DHCP} in
 		1)
 			/sbin/dhcpcd -n -t 10 -h $(hostname) ${iface} &
 		;;
 		2)
 			dialog --title "IP address" --inputbox "Please enter an IP address for ${iface}:" 20 50 "192.168.1.1" 2> ${iface}.IP
-			IP=$(cat ${iface}.IP)
+			IP=$(tail -n 1 ${iface}.IP)
 			BC_TEMP=$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255
 			dialog --title "Broadcast address" --inputbox "Please enter a Broadcast address for ${iface}:" 20 50 "${BC_TEMP}" 2> ${iface}.BC
-			BROADCAST=$(cat ${iface}.BC)
+			BROADCAST=$(tail -n 1 ${iface}.BC)
 			dialog --title "Network mask" --inputbox "Please enter a Network Mask for ${iface}:" 20 50 "255.255.255.0" 2> ${iface}.NM
-			NETMASK=$(cat ${iface}.NM)
+			NETMASK=$(tail -n 1 ${iface}.NM)
 			dialog --title "Gateway" --inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" 20 50 2> ${iface}.GW
-			GATEWAY=$(cat ${iface}.GW)
+			GATEWAY=$(tail -n 1 ${iface}.GW)
 			dialog --title "DNS server" --inputbox "Please enter a name server to use (hit enter for none:)" 20 50 2> ${iface}.DNS
-			DNS=$(cat ${iface}.DNS)
+			DNS=$(tail -n 1 ${iface}.DNS)
 			/sbin/ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
 			if [ -n "${GATEWAY}" ]
 			then
@@ -250,7 +250,7 @@ livecd_config_ip() {
 			if [ -n "${DNS}" ]
 			then
 				dialog --title "DNS Search Suffix" --inputbox "Please enter any domains which you would like to search on DNS queries (hit enter for none:)" 20 50 2> ${iface}.SUFFIX
-				SUFFIX=$(cat ${iface}.SUFFIX)
+				SUFFIX=$(tail -n 1 ${iface}.SUFFIX)
 				echo "nameserver ${DNS}" > /etc/resolv.conf
 				if [ -n "${SUFFIX}" ]
 				then
@@ -265,22 +265,22 @@ livecd_write_net_conf() {
 	cd /tmp/setup.opts
 	echo "" > /etc/conf.d/net
 	echo "# This network configuration was written by net-setup" > /etc/conf.d/net
-	DHCP=$(cat ${iface}.DHCP)
+	DHCP=$(tail -n 1 ${iface}.DHCP)
 	case ${DHCP} in
 		1)
-			echo "iface_${iface}=\"dhcp\"" >> /etc/conf.d/net
+			echo "config_${iface}=\"dhcp\"" >> /etc/conf.d/net
 		;;
 		2)
-			IP=$(cat ${iface}.IP)
-			BROADCAST=$(cat ${iface}.BC)
-			NETMASK=$(cat ${iface}.NM)
-			GATEWAY=$(cat ${iface}.GW)
+			IP=$(tail -n 1 ${iface}.IP)
+			BROADCAST=$(tail -n 1 ${iface}.BC)
+			NETMASK=$(tail -n 1 ${iface}.NM)
+			GATEWAY=$(tail -n 1 ${iface}.GW)
 			if [ -n "${IP}" -a -n "${BROADCAST}" -a -n "${NETMASK}" ]
 			then
-				echo "iface_eth0=\"${IP} broadcast ${BROADCAST} netmask ${NETMASK}\"" >> /etc/conf.d/net
+				echo "config_${iface}=( \"${IP} broadcast ${BROADCAST} netmask ${NETMASK}\" )" >> /etc/conf.d/net
 				if [ -n "${GATEWAY}" ]
 				then
-					echo "gateway=\"${iface}/${GATEWAY}\"" >> /etc/conf.d/net
+					echo "routes_${iface}=( \"default via ${GATEWAY}\" )" >> /etc/conf.d/net
 				fi
 			fi
 		;;
