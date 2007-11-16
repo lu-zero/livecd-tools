@@ -388,7 +388,7 @@ start() {
 				einfo "Network device ${HILITE}${nics}${NORMAL} detected, DHCP broadcasting for IP ..."
 				if [ -f /var/run/dhcpcd-${nics}.pid ]
 				then
-					if [ ! $(/sbin/ifconfig ${nics} | grep "inet addr" ]
+					if [ ! $(/sbin/ifconfig ${nics} | grep "inet addr") ]
 					then
 						kill $(cat /var/run/dhcpcd-${nics}.pid)
 						sleep 2
