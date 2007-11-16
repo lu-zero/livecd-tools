@@ -287,7 +287,7 @@ start() {
 				;;
 			esac
 			[ -n "${PC}" ] && einfo "${PC}"
-			[ -x /usr/sbin/hwsetup ] && hwsetup -p >/dev/null
+			[ -x /usr/sbin/hwsetup ] && hwsetup
 		eend
 	else
 		ewarn "Hardware detection disabled via cmdline ..."
@@ -388,7 +388,7 @@ start() {
 				einfo "Network device ${HILITE}${nics}${NORMAL} detected, DHCP broadcasting for IP ..."
 				if [ -f /var/run/dhcpcd-${nics}.pid ]
 				then
-					if [ ! $(/sbin/ifconfig ${nics} | grep "inet addr") ]
+					if [ -z "$(/sbin/ifconfig ${nics} | grep 'inet addr')" ]
 					then
 						kill $(cat /var/run/dhcpcd-${nics}.pid)
 						sleep 2
