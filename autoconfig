@@ -1,5 +1,8 @@
 #!/sbin/runscript
 
+# This script is used by Gentoo release media to start certain services and to
+# ensure a sane setup for a CD-based boot.
+
 ACPI="no"
 ALSA="yes"
 APM="no"
@@ -34,8 +37,20 @@ get_config() {
 			nogpm)
 				GPM="no"
 			;;
-			dopcmcia)
-				PCMCIA="yes"
+			nohotplug)
+				HOTPLUG="no"
+			;;
+			nonfs)
+				NFS="no"
+			;;
+			nosound)
+				ALSA="no"
+			;;
+			nox)
+				X11="no"
+			;;
+			ide\=nodma)
+				IDEDMA="no"
 			;;
 			doapm)
 				ACPI="no"
@@ -45,23 +60,11 @@ get_config() {
 				ACPI="yes"
 				APM="no"
 			;;
-			ide\=nodma)
-				IDEDMA="no"
-			;;
-			nohotplug)
-				HOTPLUG="no"
-			;;
-			nosound)
-				ALSA="no"
-			;;
-			nonfs)
-				NFS="no"
+			dopcmcia)
+				PCMCIA="yes"
 			;;
 			dosshd)
 				SSHD="yes"
-			;;
-			nox)
-				X11="no"
 			;;
 		esac
 	done
@@ -108,8 +111,6 @@ list_services() {
 
 unpack_firmware() {
 	# This unpacks any firmware tarballs.
-	# This has been moved here from coldplug, but might not be very effective
-	# since udev does coldplugging in 089 and higher.
 	if [ -e /lib/firmware.tar.bz2 ]
 	then
 		ebegin "Unpacking hotplug firmware"
@@ -124,7 +125,6 @@ get_info() {
 	if [ ! -z "${1}" -a ! -z "${2}" ]
 	then
 		tmp=$(grep "^$1[[:space:]]\+:" /proc/cpuinfo | head -n 1 | cut -d" " -f3-)
-#		tmp=$([[ $'\n'$(</proc/cpuinfo) =~ $'\n''$1[[:space:]]\+:' ]] | head -n 1 | cut -d" " -f3-)
 		eval "${2}='${tmp}'"
 	fi
 }
@@ -236,7 +236,7 @@ start() {
 	get_config
 
 	# First off, we want hotplug/coldplug enabled, so let's re-enable it.
-	# We do this even if we aren't startup up the hotplug/coldplug
+	# We do this even if we aren't starting up the hotplug/coldplug
 	# services for the installer.
 	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
 	# Now, we check if we're supposed to run a coldplug script.
@@ -262,7 +262,6 @@ start() {
 	then
 		ebegin "Hardware detection started"
 			local numcpu="$(grep -c '^processor[[:space:]]\+:' /proc/cpuinfo)"
-#			local numcpu=$([[ $'\n'$(</proc/cpuinfo) =~ $'\n''processor[[:space:]]\+:' ]] | wc -l)
 			local arch="$(uname -m)"
 
 			case ${arch} in
@@ -354,13 +353,13 @@ start() {
 			/etc/conf.d/net
 		for i in `seq 0 4`
 		do
-			echo "config_eth$i=( \"none\" )" >> /etc/conf.d/net
+			echo "config_eth${i}=( \"none\" )" >> /etc/conf.d/net
 		done
 		ewarn "Skipping DHCP broadcast ..."
 	fi
 
 	# Read in what hwsetup has found
-	[ -f /etc/sysconfig/gentoo ] && . /etc/sysconfig/gentoo
+	[ -f /etc/sysconfig/gentoo ] && source /etc/sysconfig/gentoo
 
 	# Mouse
 	if [ -n "${MOUSE_DEVICE}" ]
@@ -370,7 +369,6 @@ start() {
 		if [ -x /usr/sbin/gpm ]
 		then
 			if [ $(grep "#MOUSE=${MOUSETYPE}" /etc/conf.d/gpm) ]
-#			if [ $([[ $'\n'$(</etc/conf.d/gpm) =~ $'\n''#MOUSE=${MOUSETYPE}' ]]) ]
 			then
 				sed -i "\@MOUSE=${MOUSETYPE}@s@^#@@" /etc/conf.d/gpm
 			else
@@ -378,7 +376,6 @@ start() {
 			fi
 
 			if [ $(grep "#MOUSEDEV=${DEVICE}" /etc/conf.d/gpm) ]
-#			if [ $([[ $'\n'$(</etc/conf.d/gpm) =~ $'\n''#MOUSEDEV=${DEVICE}' ]]) ]
 			then
 				sed -i "\@MOUSEDEV=${DEVICE}@s@^#@@" /etc/conf.d/gpm
 			else
@@ -417,6 +414,7 @@ start() {
 		if [ "${SSHD}" = "yes" ]
 		then
 			# TODO: need to add a password check/warning here
+			ewarn "WARNING: You are starting sshd. You need to set a root password!"
 			[ -x /etc/init.d/sshd ] && start_service sshd
 		fi
 	else
