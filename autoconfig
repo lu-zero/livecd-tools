@@ -12,6 +12,7 @@ DMRAID="yes"
 EVMS="no"
 FIREWIRE="yes"
 GPM="yes"
+HALD="yes"
 HOTPLUG="yes"
 IDEDMA="yes"
 LVM="no"
@@ -42,6 +43,7 @@ get_config() {
 				EVMS="no"
 				FIREWIRE="no"
 				GPM="no"
+				HALD="no"
 				HOTPLUG="no"
 				LVM="no"
 				MDADM="no"
@@ -211,6 +213,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
 	svcs="${svcs} $(check_svc ${APM} apmd)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
+	svcs="${svcs} $(check_svc ${HALD} hald)"
 	svcs="${svcs} $(check_svc ${HOTPLUG} coldplug hotplug)"
 	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
 	svcs="${svcs} $(check_svc ${NFS} nfsmount)"
@@ -220,6 +223,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${X11} mkxf86config x-setup)"
 
 	### TODO: make this baselayout-2 compatible
+	### TODO: make these checks accurate using service dependencies
 
 	echo ${svcs}
 }
