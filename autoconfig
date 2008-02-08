@@ -3,17 +3,28 @@
 # This script is used by Gentoo release media to start certain services and to
 # ensure a sane setup for a CD-based boot.
 
-ACPI="no"
+ACPI="yes"
 ALSA="yes"
 APM="no"
 DETECT="yes"
 DHCP="yes"
+DMRAID="yes"
+EVMS="no"
+FIREWIRE="yes"
 GPM="yes"
 HOTPLUG="yes"
 IDEDMA="yes"
+LVM="no"
+MDADM="yes"
+NET="yes"
 NFS="yes"
+PASSWD="yes"
+PATA="yes"
 PCMCIA="yes"
+SATA="yes"
+SCSI="no"
 SSHD="no"
+USB="yes"
 X11="yes"
 
 get_config() {
@@ -21,18 +32,42 @@ get_config() {
 
 	for x in ${CMDLINE} ; do
 		case "${x}" in
+			# We put nodetect first, so we can override it with do* commands
 			nodetect)
 				ACPI="no"
 				ALSA="no"
 				APM="no"
 				DETECT="no"
+				DMRAID="no"
+				EVMS="no"
+				FIREWIRE="no"
 				GPM="no"
 				HOTPLUG="no"
+				LVM="no"
+				MDADM="no"
+				NET="no"
 				NFS="no"
+				PCMCIA="no"
+				PATA="no"
+				SATA="no"
+				SCSI="no"
+				USB="no"
 				X11="no"
+			;;
+			noapm)
+				APM="no"
 			;;
 			nodhcp)
 				DHCP="no"
+			;;
+			nodmraid)
+				DMRAID="no"
+			;;
+			noevms|noevms2)
+				EVMS="no"
+			;;
+			nofirewire)
+				FIREWIRE="no"
 			;;
 			nogpm)
 				GPM="no"
@@ -40,31 +75,109 @@ get_config() {
 			nohotplug)
 				HOTPLUG="no"
 			;;
+			noload=*)
+				NOLOAD="$*"
+			;;
+			nolvm|nolvm2)
+				LVM="no"
+			;;
+			nomdadm)
+				MDADM="no"
+			;;
+			nonet)
+				NET="no"
+			;;
 			nonfs)
 				NFS="no"
+			;;
+			nopata)
+				PATA="no"
+			;;
+			nopcmcia)
+				PCMCIA="no"
+			;;
+			nosata)
+				SATA="no"
+			;;
+			noscsi)
+				SCSI="no"
+			;;
+			nosshd)
+				SSHD="no"
 			;;
 			nosound)
 				ALSA="no"
 			;;
+			nousb)
+				USB="no"
 			nox)
 				X11="no"
 			;;
 			ide\=nodma)
 				IDEDMA="no"
 			;;
-			doapm)
-				ACPI="no"
-				APM="yes"
-			;;
 			acpi\=on|acpi\=force)
 				ACPI="yes"
 				APM="no"
 			;;
+			doapm)
+				ACPI="no"
+				APM="yes"
+			;;
+			dodhcp)
+				DHCP="yes"
+			;;
+			dodmraid)
+				DMRAID="yes"
+			;;
+			doevms|doevms2)
+				EVMS="yes"
+			;;
+			dofirewire)
+				FIREWIRE="yes"
+			;;
+			dogpm)
+				GPM="yes"
+			;;
+			dohotplug)
+				HOTPLUG="yes"
+			;;
+			dolvm|dolvm2)
+				LVM="yes"
+			;;
+			domdadm)
+				MDADM="yes"
+			;;
+			donet)
+				NET="yes"
+			;;
+			dopata)
+				PATA="yes"
+			;;
 			dopcmcia)
 				PCMCIA="yes"
 			;;
+			dosata)
+				SATA="yes"
+			;;
+			doscsi)
+				SCSI="yes"
+			;;
 			dosshd)
 				SSHD="yes"
+			;;
+			dosound)
+				SOUND="yes"
+			;;
+			dousb)
+				USE="yes"
+			;;
+			dox)
+				X11="yes"
+			;;
+			passwd=*)
+				PASSWD="no"
+				PASSWORD="$*"
 			;;
 		esac
 	done
@@ -73,7 +186,6 @@ get_config() {
 depend() {
 	need modules
 	before net
-#	provide gpm pcmcia apmd acpid coldplug hdparm alsasound mkxf86config x-setup
 }
 
 # Checks whether a service will be started by autoconfig.
@@ -95,16 +207,19 @@ check_svc() {
 list_services() {
 	get_config
 
-	local svcs="$(check_svc ${APM} apmd)"
-	svcs="${svcs} $(check_svc ${ACPI} acpid)"
-	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
-	svcs="${svcs} $(check_svc ${PCMCIA} pcmcia)"
+	local svcs="$(check_svc ${ACPI} acpid)"
+	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
+	svcs="${svcs} $(check_svc ${APM} apmd)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
 	svcs="${svcs} $(check_svc ${HOTPLUG} coldplug hotplug)"
-	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
+	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
 	svcs="${svcs} $(check_svc ${NFS} nfsmount)"
+	svcs="${svcs} $(check_svc ${PASSWD} pwgen"
+	svcs="${svcs} $(check_svc ${PCMCIA} pcmcia)"
 	svcs="${svcs} $(check_svc ${SSH} sshd)"
 	svcs="${svcs} $(check_svc ${X11} mkxf86config x-setup)"
+
+	### TODO: make this baselayout-2 compatible
 
 	echo ${svcs}
 }
@@ -411,10 +526,21 @@ start() {
 		done
 		[ "${NFS}" = "yes" ] \
 			&& [ -x /etc/init.d/nfsmount ] && start_service nfsmount
+		if [ "${PASSWD}" = "no" ]
+		then
+			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
+		else
+			start_service pwgen
+		fi
 		if [ "${SSHD}" = "yes" ]
 		then
-			# TODO: need to add a password check/warning here
-			ewarn "WARNING: You are starting sshd. You need to set a root password!"
+			# If we have passwd= on the command line, we don't run pwgen and we
+			# set the root password to PASSWORD.
+			if [ "${PASSWD}" = "yes" ]
+			then
+				ewarn "WARNING: You are starting sshd with a scrambled root password!!!"
+				ewarn "WARNING: You need to set a root password to be able to login remotely."
+			fi
 			[ -x /etc/init.d/sshd ] && start_service sshd
 		fi
 	else
