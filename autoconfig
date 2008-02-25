@@ -6,6 +6,7 @@
 ACPI="yes"
 ALSA="yes"
 APM="no"
+BRLTTY="no"
 DETECT="yes"
 DHCP="yes"
 DMRAID="yes"
@@ -115,12 +116,15 @@ get_config() {
 			nox)
 				X11="no"
 			;;
-			ide\=nodma)
-				IDEDMA="no"
-			;;
 			acpi\=on|acpi\=force)
 				ACPI="yes"
 				APM="no"
+			;;
+			brltty=*)
+				BRLTTY="yes"
+			;;
+			ide\=nodma)
+				IDEDMA="no"
 			;;
 			doapm)
 				ACPI="no"
@@ -358,23 +362,10 @@ start() {
 	# We do this even if we aren't starting up the hotplug/coldplug
 	# services for the installer.
 	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
-	# Now, we check if we're supposed to run a coldplug script.
-	if [ "${HOTPLUG}" = "yes" ]
+
+	if [ "${BRLTTY}" = "yes" ]
 	then
-		# Check whether we should be using hotplug/coldplug or whether we should
-		# just let udev do it all.
-		if [ -x /etc/init.d/coldplug ]
-		then
-			start_service coldplug
-		elif [ -x /etc/init.d/hotplug ]
-		then
-			start_service hotplug
-		else
-			unpack_firmware
-			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
-		fi
-	else
-		ewarn "Hotplug/Coldplug disabled via cmdline ..."
+		[ -x /etc/init.d/brltty ] && start_service brltty
 	fi
 
 	if [ "${DETECT}" = "yes" ]
@@ -417,10 +408,29 @@ start() {
 				;;
 			esac
 			[ -n "${PC}" ] && einfo "${PC}"
-			[ -x /usr/sbin/hwsetup ] && hwsetup
 		eend
 	else
 		ewarn "Hardware detection disabled via cmdline ..."
+	fi
+
+	# Now, we check if we're supposed to run a coldplug script.
+	if [ "${HOTPLUG}" = "yes" ]
+	then
+		# Check whether we should be using hotplug/coldplug or whether we should
+		# just let udev do it all.
+		if [ -x /etc/init.d/coldplug ]
+		then
+			start_service coldplug
+		elif [ -x /etc/init.d/hotplug ]
+		then
+			start_service hotplug
+		else
+			unpack_firmware
+			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
+		fi
+		[ -x /usr/sbin/hwsetup ] && hwsetup
+	else
+		ewarn "Hotplug/Coldplug disabled via cmdline ..."
 	fi
 
 	if [ "${APM}" = "yes" ]
