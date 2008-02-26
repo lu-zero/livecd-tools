@@ -333,7 +333,7 @@ detect_ppc() {
 		"PowerMac G4 AGP Graphics")
 			machtype="Apple PowerMac G4"
 			;;
-		"PowerBook Titanium"|'PowerBook G4 15"')
+		"PowerBook Titanium"|"PowerBook G4 15\"")
 			machtype="Apple Powerbook G4"
 			;;
 		"Unknown Intrepid-based")
@@ -359,8 +359,8 @@ start() {
 	echo "0" > /proc/sys/kernel/printk
 	get_config
 
-	# First off, we want hotplug/coldplug enabled, so let's re-enable it.
-	# We do this even if we aren't starting up the hotplug/coldplug
+	# First off, we want hotplug/coldplug enabled, so we re-enable it.
+	# We do this even if we are not starting up the hotplug/coldplug
 	# services for the installer.
 	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
 
@@ -414,7 +414,7 @@ start() {
 		ewarn "Hardware detection disabled via cmdline ..."
 	fi
 
-	# Now, we check if we're supposed to run a coldplug script.
+	# Now, we check if we are supposed to run a coldplug script.
 	if [ "${HOTPLUG}" = "yes" ]
 	then
 		# Check whether we should be using hotplug/coldplug or whether we should
@@ -549,7 +549,7 @@ start() {
 		fi
 		if [ "${SSHD}" = "yes" ]
 		then
-			# If we have passwd= on the command line, we don't run pwgen and we
+			# If we have passwd= on the command line, we do not run pwgen and we
 			# set the root password to PASSWORD.
 			if [ "${PASSWD}" = "yes" ]
 			then
