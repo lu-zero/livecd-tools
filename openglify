@@ -30,19 +30,25 @@ then
 	ln -sf /etc/opengl/lib32/libGL.la /usr/lib32/libGL.la
 fi
 
-# We create symlinks fo the libglx.so and libglx.a
+# We create symlinks for the libglx.so and libglx.a
 if [ -d /usr/lib/xorg/modules/extensions ]
 then
 	ln -sf /etc/opengl/lib/modules/extensions/libglx.so \
 		/usr/lib/xorg/modules/extensions/libglx.so
 	ln -sf /etc/opengl/lib/modules/extensions/libglx.a \
 		/usr/lib/xorg/modules/extensions/libglx.a
-	if [ -d /usr/lib32 ]
+	if [ -d /usr/lib32/xorg/modules/extensions ]
 	then
 		ln -sf /etc/opengl/lib32/modules/extensions/libglx.so \
 			/usr/lib32/xorg/modules/extensions/libglx.so
 		ln -sf /etc/opengl/lib32/modules/extensions/libglx.a \
 			/usr/lib32/xorg/modules/extensions/libglx.a
+	elif [ -d /usr/lib32/modules/extensions ]
+	then
+		ln -sf /etc/opengl/lib32/modules/extensions/libglx.so \
+			/usr/lib32/modules/extensions/libglx.so
+		ln -sf /etc/opengl/lib32/modules/extensions/libglx.a \
+			/usr/lib32/modules/extensions/libglx.a
 	fi
 fi
 
