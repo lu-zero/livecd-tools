@@ -539,8 +539,11 @@ start() {
 				fi
 			fi
 		done
-		[ "${NFS}" = "yes" ] \
-			&& [ -x /etc/init.d/nfsmount ] && start_service nfsmount
+		if [ "${NFS}" = "yes" ]
+		then
+			[ -x /etc/init.d/portmap ] && start_service portmap
+			[ -x /etc/init.d/nfsmount ] && start_service nfsmount
+		fi
 		if [ "${PASSWD}" = "no" ]
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
