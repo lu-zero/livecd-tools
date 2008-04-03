@@ -429,6 +429,7 @@ start() {
 			unpack_firmware
 			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
 		fi
+		[ -e /etc/sysconfig ] || mkdir -p /etc/sysconfig
 		[ -x /usr/sbin/hwsetup ] && hwsetup
 	else
 		ewarn "Hotplug/Coldplug disabled via cmdline ..."
