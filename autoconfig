@@ -7,6 +7,7 @@ ACPI="yes"
 ALSA="yes"
 APM="no"
 BRLTTY="no"
+COLDPLUG="yes"
 DETECT="yes"
 DHCP="yes"
 DMRAID="yes"
@@ -14,7 +15,6 @@ EVMS="no"
 FIREWIRE="yes"
 GPM="yes"
 HALD="yes"
-HOTPLUG="yes"
 IDEDMA="yes"
 LVM="no"
 MDADM="yes"
@@ -39,13 +39,13 @@ get_config() {
 				ACPI="no"
 				ALSA="no"
 				APM="no"
+				COLDPLUG="no"
 				DETECT="no"
 				DMRAID="no"
 				EVMS="no"
 				FIREWIRE="no"
 				GPM="no"
 				HALD="no"
-				HOTPLUG="no"
 				LVM="no"
 				MDADM="no"
 				NET="no"
@@ -59,6 +59,9 @@ get_config() {
 			;;
 			noapm)
 				APM="no"
+			;;
+			nocoldplug|nohotplug)
+				COLDPLUG="no"
 			;;
 			nodhcp)
 				DHCP="no"
@@ -74,9 +77,6 @@ get_config() {
 			;;
 			nogpm)
 				GPM="no"
-			;;
-			nohotplug)
-				HOTPLUG="no"
 			;;
 			noload=*)
 				NOLOAD="$*"
@@ -131,6 +131,9 @@ get_config() {
 				ACPI="no"
 				APM="yes"
 			;;
+			docoldplug|dohotplug)
+				COLDPLUG="yes"
+			;;
 			dodhcp)
 				DHCP="yes"
 			;;
@@ -145,9 +148,6 @@ get_config() {
 			;;
 			dogpm)
 				GPM="yes"
-			;;
-			dohotplug)
-				HOTPLUG="yes"
 			;;
 			dolvm|dolvm2)
 				LVM="yes"
@@ -217,9 +217,9 @@ list_services() {
 	local svcs="$(check_svc ${ACPI} acpid)"
 	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
 	svcs="${svcs} $(check_svc ${APM} apmd)"
+	svcs="${svcs} $(check_svc ${COLDPLUG} coldplug hotplug)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
 	svcs="${svcs} $(check_svc ${HALD} hald)"
-	svcs="${svcs} $(check_svc ${HOTPLUG} coldplug hotplug)"
 	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
 	svcs="${svcs} $(check_svc ${NFS} nfsmount)"
 	svcs="${svcs} $(check_svc ${PASSWD} pwgen)"
@@ -237,7 +237,7 @@ unpack_firmware() {
 	# This unpacks any firmware tarballs.
 	if [ -e /lib/firmware.tar.bz2 ]
 	then
-		ebegin "Unpacking hotplug firmware"
+		ebegin "Unpacking firmware"
 		tar xjf /lib/firmware.tar.bz2 -C /lib/firmware
 		eend 0
 	fi
@@ -359,11 +359,6 @@ start() {
 	echo "0" > /proc/sys/kernel/printk
 	get_config
 
-	# First off, we want hotplug/coldplug enabled, so we re-enable it.
-	# We do this even if we are not starting up the hotplug/coldplug
-	# services for the installer.
-	sed -i 's/RC_COLDPLUG="no"/RC_COLDPLUG="yes"/' /etc/conf.d/rc
-
 	if [ "${BRLTTY}" = "yes" ]
 	then
 		[ -x /etc/init.d/brltty ] && start_service brltty
@@ -415,7 +410,7 @@ start() {
 	fi
 
 	# Now, we check if we are supposed to run a coldplug script.
-	if [ "${HOTPLUG}" = "yes" ]
+	if [ "${COLDPLUG}" = "yes" ]
 	then
 		# Check whether we should be using hotplug/coldplug or whether we should
 		# just let udev do it all.
