@@ -184,7 +184,7 @@ get_config() {
 			;;
 			passwd=*)
 				PASSWD="no"
-				PASSWORD="$*"
+				PASSWORD="${x#*=}"
 			;;
 		esac
 	done
