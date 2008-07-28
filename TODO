@@ -1,4 +1,5 @@
 - Figure out why dependent services don't start with start_service
 - Create ChangeLog from svn2cl
 - Integrate xac support
-
+- Clean up service detection to be more useful
+- Create service list earlier in boot process
