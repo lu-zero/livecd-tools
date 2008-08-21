@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export HOME=/root
 cat /etc/motd 2>/dev/null
 cd /root
 [[ -e .bash_profile ]] && source .bash_profile
