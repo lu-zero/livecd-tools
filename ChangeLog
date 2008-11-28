@@ -1,6 +1,9 @@
 # Copyright 1999-2008 Gentoo Foundation; 2008 Chris Gianelloni
 # Distributed under the GPL v2.1
 
+  28 Nov 2008; Andrew Gaffney <agaffney@gentoo.org> autoconfig:
+  Apply patch from jer for gentoo bug #249155
+
   21 Aug 2008; Andrew Gaffney <agaffney@gentoo.org> bashlogin:
   export HOME=/root for bug 235068
 

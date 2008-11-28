@@ -361,7 +361,7 @@ start() {
 
 	if [ "${BRLTTY}" = "yes" ]
 	then
-		[ -x /etc/init.d/brltty ] && start_service brltty
+		[ -x /etc/init.d/brltty ] && /etc/init.d/brltty start
 	fi
 
 	if [ "${DETECT}" = "yes" ]
@@ -416,10 +416,10 @@ start() {
 		# just let udev do it all.
 		if [ -x /etc/init.d/coldplug ]
 		then
-			start_service coldplug
+			/etc/init.d/coldplug start
 		elif [ -x /etc/init.d/hotplug ]
 		then
-			start_service hotplug
+			/etc/init.d/hotplug start
 		else
 			unpack_firmware
 			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
@@ -434,7 +434,7 @@ start() {
 	then
 		modprobe apm power_off=1 >/dev/null 2>&1 && \
 			einfo "APM BIOS found, power management functions enabled ..."
-		[ -x /etc/init.d/apmd ] && start_service apmd
+		[ -x /etc/init.d/apmd ] && /etc/init.d/apmd start
 	else
 		einfo "Not Loading APM Bios support ..."
 	fi
@@ -451,7 +451,7 @@ start() {
 		modprobe thermal >/dev/null 2>&1
 		modprobe video >/dev/null 2>&1
 		modprobe dock >/dev/null 2>&1
-		[ -x /etc/init.d/acpid ] && start_service acpid
+		[ -x /etc/init.d/acpid ] && /etc/init.d/acpid start
 		eend
 	else
 		einfo "Not Loading ACPI support ..."
@@ -459,14 +459,14 @@ start() {
 
 	if [ "${IDEDMA}" = "yes" ]
 	then
-		[ -x /etc/init.d/hdparm ] && start_service hdparm
+		[ -x /etc/init.d/hdparm ] && /etc/init.d/hdparm start
 	else
 		ewarn "Disabling IDE DMA support ..."
 	fi
 
 	if [ "${PCMCIA}" = "yes" ]
 	then
-		[ -x /etc/init.d/pcmcia ] && start_service pcmcia
+		[ -x /etc/init.d/pcmcia ] && /etc/init.d/pcmcia start
 	else
 		ewarn "PCMCIA disabled via cmdline ..."
 	fi
@@ -509,7 +509,7 @@ start() {
 			fi
 
 			[ "${GPM}" = "yes" ] \
-				&& [ -x /etc/init.d/gpm ] && start_service gpm
+				&& [ -x /etc/init.d/gpm ] && /etc/init.d/gpm start
 		fi
 	fi
 
@@ -537,14 +537,14 @@ start() {
 		done
 		if [ "${NFS}" = "yes" ]
 		then
-			[ -x /etc/init.d/portmap ] && start_service portmap
-			[ -x /etc/init.d/nfsmount ] && start_service nfsmount
+			[ -x /etc/init.d/portmap ] && /etc/init.d/portmap start
+			[ -x /etc/init.d/nfsmount ] && /etc/init.d/nfsmount start
 		fi
 		if [ "${PASSWD}" = "no" ]
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
 		else
-			start_service pwgen
+			/etc/init.d/pwgen start
 		fi
 		if [ "${SSHD}" = "yes" ]
 		then
@@ -555,7 +555,7 @@ start() {
 				ewarn "WARNING: You are starting sshd with a scrambled root password!!!"
 				ewarn "WARNING: You need to set a root password to be able to login remotely."
 			fi
-			[ -x /etc/init.d/sshd ] && start_service sshd
+			[ -x /etc/init.d/sshd ] && /etc/init.d/sshd start
 		fi
 	else
 		ewarn "No Network device auto detected ..."
@@ -576,7 +576,7 @@ start() {
 
 			if [ -x /etc/init.d/alsasound ]
 			then
-				start_service alsasound
+				/etc/init.d/alsasound start
 			fi
 
 			if [ -e /proc/asound/cards ]
@@ -615,11 +615,11 @@ start() {
 	then
 		if [ -x /etc/init.d/mkxf86config ]
 		then
-			start_service mkxf86config
+			/etc/init.d/mkxf86config start
 		fi
 		if [ -x /etc/init.d/x-setup ]
 		then
-			start_service x-setup
+			/etc/init.d/x-setup start
 		fi
 	else
 		touch /etc/init.d/.noxdm
