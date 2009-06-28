@@ -25,6 +25,9 @@ PATA="yes"
 PCMCIA="yes"
 SATA="yes"
 SCSI="no"
+SPEAKUP="no"
+SPEAKUP_MODULE=""
+SPEAKUP_OPTIONS=""
 SSHD="no"
 USB="yes"
 X11="yes"
@@ -123,6 +126,7 @@ get_config() {
 			;;
 			brltty=*)
 				BRLTTY="yes"
+				X11="no"
 			;;
 			ide\=nodma)
 				IDEDMA="no"
@@ -185,6 +189,14 @@ get_config() {
 			passwd=*)
 				PASSWD="no"
 				PASSWORD="${x#*=}"
+			;;
+			speakup.synth=*)
+				SPEAKUP="yes"
+				SPEAKUP_MODULE="speakup_${x#*=}"
+				X11="no"
+			;;
+			speakup_*.{ser,port}=*)
+				SPEAKUP_OPTIONS="${SPEAKUP_OPTIONS} ${x#*.}"
 			;;
 		esac
 	done
@@ -362,6 +374,11 @@ start() {
 	if [ "${BRLTTY}" = "yes" ]
 	then
 		[ -x /etc/init.d/brltty ] && /etc/init.d/brltty start
+	fi
+
+	if [ "${SPEAKUP}" = "yes" ]
+	then
+		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS}
 	fi
 
 	if [ "${DETECT}" = "yes" ]
@@ -589,6 +606,15 @@ start() {
 						[ -n "$(grep Master /etc/amixer)" ] \
 							&& amixer -c $i -q set Master 95% unmute \
 							>/dev/null 2>&1
+						[ -n "$(grep Front /etc/amixer)" ] \
+							&& amixer -c $i -q set Front 95% unmute \
+							>/dev/null 2>&1
+						[ -n "$(grep HDMI /etc/amixer)" ] \
+							&& amixer -c $i -q set HDMI 95% unmute \
+							>/dev/null 2>&1
+						[ -n "$(grep IEC958 /etc/amixer)" ] \
+							&& amixer -c $i -q set IEC958 95% unmute \
+							>/dev/null 2>&1
 						[ -n "$(grep PCM /etc/amixer)" ] \
 							&& amixer -c $i -q set PCM 95% unmute \
 							>/dev/null 2>&1
@@ -603,6 +629,11 @@ start() {
 							>/dev/null 2>&1
 					fi
 				done
+
+				if [ "${SPEAKUP_MODULE}" = "speakup_soft" ]
+				then
+					[ -x /etc/init.d/espeakup ] && /etc/init.d/espeakup start
+				fi
 			fi
 		fi
 	else
