@@ -8,10 +8,10 @@
   give some credit, even if it is not perfect.
 
   28 Jun 2009; Andrew Gaffney <agaffney@gentoo.org> autoconfig:
-  Apply patch for speakup support from gentoo bug #267708
+  Apply patch for speakup support from Gentoo bug #267708
 
   28 Nov 2008; Andrew Gaffney <agaffney@gentoo.org> autoconfig:
-  Apply patch from jer for gentoo bug #249155
+  Apply patch from jer for Gentoo bug #249155
 
   21 Aug 2008; Andrew Gaffney <agaffney@gentoo.org> bashlogin:
   export HOME=/root for bug 235068
