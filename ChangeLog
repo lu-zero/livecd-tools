@@ -16,14 +16,14 @@
   21 Aug 2008; Andrew Gaffney <agaffney@gentoo.org> bashlogin:
   export HOME=/root for bug 235068
 
-  28 Jul 2008; Chris Gianelloni <wolf31o2@gentoo.org> TODO:
+  28 Jul 2008; Chris Gianelloni <wolf31o2@wolf31o2.org> TODO:
   Added some more notes to TODO and add a ChangeLog entry for Andrew's
   latest changes.
 
   24 Jul 2008; Andrew Gaffney <agaffney@gentoo.org> autoconfig:
   Fix passwd= support for Gentoo bug #230968.
 
-  24 Jul 2008; Chris Gianelloni <wolf31o2@gentoo.org> ChangeLog:
+  24 Jul 2008; Chris Gianelloni <wolf31o2@wolf31o2.org> ChangeLog:
   Initial ChangeLog, forked from Gentoo version 1.0.40 for further
   development.
 
