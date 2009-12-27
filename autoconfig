@@ -653,7 +653,7 @@ start() {
 			/etc/init.d/x-setup start
 		fi
 	else
-		touch /etc/init.d/.noxdm
+		touch /etc/.noxdm
 	fi
 
 	killall hwsetup 2>/dev/null
