@@ -237,7 +237,6 @@ list_services() {
 	svcs="${svcs} $(check_svc ${PASSWD} pwgen)"
 	svcs="${svcs} $(check_svc ${PCMCIA} pcmcia)"
 	svcs="${svcs} $(check_svc ${SSH} sshd)"
-	svcs="${svcs} $(check_svc ${X11} mkxf86config x-setup)"
 
 	### TODO: make this baselayout-2 compatible
 	### TODO: make these checks accurate using service dependencies
@@ -642,17 +641,7 @@ start() {
 
 	[ -n "${XDESC}" ] && einfo "VideoCard:   ${HILITE}${XDESC}${NORMAL}"
 
-	if [ "${X11}" = "yes" ]
-	then
-		if [ -x /etc/init.d/mkxf86config ]
-		then
-			/etc/init.d/mkxf86config start
-		fi
-		if [ -x /etc/init.d/x-setup ]
-		then
-			/etc/init.d/x-setup start
-		fi
-	else
+	if [ "${X11}" = "no" ]
 		touch /etc/.noxdm
 	fi
 

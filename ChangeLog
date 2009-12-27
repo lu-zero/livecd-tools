@@ -2,6 +2,11 @@
 # Copyright 1999-2009 Gentoo Foundation; 2008-2009 Various authors (see AUTHORS)
 # Distributed under the GPL v2
 
+  27 Dec 2009; Andrew Gaffney <agaffney@gentoo.org> autoconfig, -x-setup,
+  -x-setup.init:
+  Remove x-setup and mkxf86config stuff since they're not needed with modern
+  xorg-server (for Gentoo bug #289946)
+
   27 Dec 2009; Andrew Gaffney <agaffney@gentoo.org> autoconfig:
   Use /etc/.noxdm intead of /etc/init.d/.noxdm for Gentoo bug #286308
 
