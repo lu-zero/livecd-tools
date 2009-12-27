@@ -617,6 +617,9 @@ start() {
 						[ -n "$(grep PCM /etc/amixer)" ] \
 							&& amixer -c $i -q set PCM 95% unmute \
 							>/dev/null 2>&1
+						[ -n "$(grep Speaker /etc/amixer)" ] \
+							&& amixer -c $i -q set Speaker 95% unmute \
+							>/dev/null 2>&1
 						[ -n "$(grep Mic /etc/amixer)" ] \
 							&& amixer -c $i -q set Mic 95% mute cap \
 							>/dev/null 2>&1
