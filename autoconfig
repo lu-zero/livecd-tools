@@ -226,7 +226,7 @@ check_svc() {
 list_services() {
 	get_config
 	# Must not print anything here
-	if [ "${DETECT}" = "yes" ]
+	if yesno "${DETECT}"
 	then
 		local arch="$(uname -m)"
 
@@ -402,14 +402,12 @@ start() {
 	echo "0" > /proc/sys/kernel/printk
 	get_config
 
-	# DONE: BRLTTY migrated to depend
-
-	if [ "${SPEAKUP}" = "yes" ]
+	if yesno "${SPEAKUP}"
 	then
 		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS}
 	fi
 
-	if [ "${DETECT}" = "yes" ]
+	if yesno "${DETECT}"
 	then
 		ebegin "Hardware detection started"
 			local numcpu="$(grep -c '^processor[[:space:]]\+:' /proc/cpuinfo)"
@@ -455,7 +453,7 @@ start() {
 	fi
 
 	# Now, we check if we are supposed to run a coldplug script.
-	if [ "${COLDPLUG}" = "yes" ]
+	if yesno "${COLDPLUG}"
 	then
 		# Check whether we should be using hotplug/coldplug or whether we should
 		# just let udev do it all.
@@ -475,7 +473,7 @@ start() {
 		ewarn "Hotplug/Coldplug disabled via cmdline ..."
 	fi
 
-	if [ "${APM}" = "yes" ]
+	if yesno "${APM}"
 	then
 		modprobe apm power_off=1 >/dev/null 2>&1 && \
 			einfo "APM BIOS found, power management functions enabled ..."
@@ -484,7 +482,7 @@ start() {
 		einfo "Not Loading APM Bios support ..."
 	fi
 
-	if [ "${ACPI}" = "yes" ]
+	if yesno "${ACPI}"
 	then
 		modprobe processor >/dev/null 2>&1 && \
 			ebegin "ACPI power management functions enabled" && \
@@ -502,21 +500,21 @@ start() {
 		einfo "Not Loading ACPI support ..."
 	fi
 
-	if [ "${IDEDMA}" = "yes" ]
+	if yesno "${IDEDMA}"
 	then
 		[ -x /etc/init.d/hdparm ] && /etc/init.d/hdparm start
 	else
 		ewarn "Disabling IDE DMA support ..."
 	fi
 
-	if [ "${PCMCIA}" = "yes" ]
+	if yesno "${PCMCIA}"
 	then
 		[ -x /etc/init.d/pcmcia ] && /etc/init.d/pcmcia start
 	else
 		ewarn "PCMCIA disabled via cmdline ..."
 	fi
 
-	if [ "${DHCP}" = "no" ]
+	if ! yesno "${DHCP}"
 	then
 		sed -i -e '/^ifconfig_eth.*dhcp.*/ s/^/#/' \
 			-e '/^iface_eth.*dhcp.*/ s/^/#/' \
@@ -548,7 +546,7 @@ start() {
 	then
 		for nics in ${NETDEVICES}
 		do
-			if [ "${DHCP}" = "yes" ]
+			if yesno "${DHCP}"
 			then
 				einfo "Network device ${HILITE}${nics}${NORMAL} detected, DHCP broadcasting for IP ..."
 				if [ -f /var/run/dhcpcd-${nics}.pid ]
@@ -562,22 +560,22 @@ start() {
 				fi
 			fi
 		done
-		if [ "${NFS}" = "yes" ]
+		if yesno "${NFS}"
 		then
 			[ -x /etc/init.d/portmap ] && /etc/init.d/portmap start
 			[ -x /etc/init.d/nfsmount ] && /etc/init.d/nfsmount start
 		fi
-		if [ "${PASSWD}" = "no" ]
+		if ! yesno "${PASSWD}"
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
 		else
 			/etc/init.d/pwgen start
 		fi
-		if [ "${SSHD}" = "yes" ]
+		if yesno "${SSHD}"
 		then
 			# If we have passwd= on the command line, we do not run pwgen and we
 			# set the root password to PASSWORD.
-			if [ "${PASSWD}" = "yes" ]
+			if yesno "${PASSWD}"
 			then
 				ewarn "WARNING: You are starting sshd with a scrambled root password!!!"
 				ewarn "WARNING: You need to set a root password to be able to login remotely."
@@ -588,7 +586,7 @@ start() {
 		ewarn "No Network device auto detected ..."
 	fi
 
-	if [ "${ALSA}" = "yes" ]
+	if yesno "${ALSA}"
 	then
 		if [ -n "${SOUND_FULLNAME}" -o -n "${SOUND_DRIVER}" ]
 		then
@@ -655,7 +653,7 @@ start() {
 
 	[ -n "${XDESC}" ] && einfo "VideoCard:   ${HILITE}${XDESC}${NORMAL}"
 
-	if [ "${X11}" = "no" ]
+	if ! yesno "${X11}"
 	then
 		touch /etc/.noxdm
 	fi
