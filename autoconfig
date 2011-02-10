@@ -260,6 +260,7 @@ list_services() {
 	local svcs="$(check_svc ${ACPI} acpid)"
 	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
 	svcs="${svcs} $(check_svc ${APM} apmd)"
+	svcs="${svcs} $(check_svc ${BRLTTY} brltty)"
 	svcs="${svcs} $(check_svc ${COLDPLUG} coldplug hotplug)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
 	svcs="${svcs} $(check_svc ${HALD} hald)"
@@ -401,10 +402,7 @@ start() {
 	echo "0" > /proc/sys/kernel/printk
 	get_config
 
-	if [ "${BRLTTY}" = "yes" ]
-	then
-		[ -x /etc/init.d/brltty ] && /etc/init.d/brltty start
-	fi
+	# DONE: BRLTTY migrated to depend
 
 	if [ "${SPEAKUP}" = "yes" ]
 	then
