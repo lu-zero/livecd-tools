@@ -203,7 +203,7 @@ get_config() {
 }
 
 depend() {
-	need modules
+	need modules $(list_services)
 	before net
 }
 
@@ -225,6 +225,37 @@ check_svc() {
 # Prints an ordered list of services that will be started by autoconfig.
 list_services() {
 	get_config
+	# Must not print anything here
+	if [ "${DETECT}" = "yes" ]
+	then
+		local arch="$(uname -m)"
+
+		case ${arch} in
+			mips*)
+				ACPI="no"
+				APM="no"
+				IDEDMA="no"
+			;;
+			i?86|x86_64)
+				:
+			;;
+			alpha)
+				ACPI="no"
+				APM="no"
+			;;
+			sparc*)
+				ACPI="no"
+				APM="no"
+			;;
+			powerpc*)
+				ACPI="no"
+				APM="no"
+			;;
+			ia64)
+				APM="no"
+			;;
+		esac
+	fi
 
 	local svcs="$(check_svc ${ACPI} acpid)"
 	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
