@@ -210,12 +210,12 @@ depend() {
 # Checks whether a service will be started by autoconfig.
 # Usage: check_svc var service [service_alternative]
 check_svc() {
-	if [ "${1}" = "yes" ]
+	if yesno "${1}"
 	then
-		if [ -x "/etc/init.d/${2}" ]
+		if rc-service -e "${2}"
 		then
 			echo "${2}"
-		elif [ -n "${3}" -a -x "/etc/init.d/${3}" ]
+		elif [ -n "${3}" ] && rc-service -e ${3}"
 		then
 			echo "${3}"
 		fi	
