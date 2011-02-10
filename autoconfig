@@ -645,6 +645,7 @@ start() {
 	[ -n "${XDESC}" ] && einfo "VideoCard:   ${HILITE}${XDESC}${NORMAL}"
 
 	if [ "${X11}" = "no" ]
+	then
 		touch /etc/.noxdm
 	fi
 
