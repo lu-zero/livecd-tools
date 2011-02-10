@@ -504,29 +504,11 @@ start() {
 	[ -f /etc/sysconfig/gentoo ] && source /etc/sysconfig/gentoo
 
 	# Mouse
+	# FIXME: If MOUSE_DEVICE is empty, we actually do not want to do anything, not even start gpm.
 	if [ -n "${MOUSE_DEVICE}" ]
 	then
-		einfo "Mouse is ${HILITE}${MOUSE_FULLNAME}${NORMAL} at ${HILITE}${MOUSE_DEVICE}${NORMAL} ..."
-		source /etc/sysconfig/mouse
-		if [ -x /usr/sbin/gpm ]
-		then
-			if [ $(grep "#MOUSE=${MOUSETYPE}" /etc/conf.d/gpm) ]
-			then
-				sed -i "\@MOUSE=${MOUSETYPE}@s@^#@@" /etc/conf.d/gpm
-			else
-				echo "MOUSE=${MOUSETYPE}" >>/etc/conf.d/gpm
-			fi
-
-			if [ $(grep "#MOUSEDEV=${DEVICE}" /etc/conf.d/gpm) ]
-			then
-				sed -i "\@MOUSEDEV=${DEVICE}@s@^#@@" /etc/conf.d/gpm
-			else
-				echo "MOUSEDEV=${DEVICE}" >>/etc/conf.d/gpm
-			fi
-
-			[ "${GPM}" = "yes" ] \
-				&& [ -x /etc/init.d/gpm ] && /etc/init.d/gpm start
-		fi
+		:
+		# Migrated to autoconfig-gpm-pre
 	fi
 
 	[ "${DETECT}" = "no" ] && DHCP="no"

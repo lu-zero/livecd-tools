@@ -1,0 +1,36 @@
+#!/sbin/runscript
+# Copyright 1999-2011 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# Do one of the following:
+# Add to /etc/rc.conf: rc_gpm_need="autoconfig-gpm-pre"
+# XOR
+# Add to /etc/conf.d/gpm: rc_need="autoconfig-gpm-pre"
+
+depend() {
+	before gpm
+	need hwsetup
+}
+
+start() {
+	# FIXME: If MOUSE_DEVICE is empty, we actually do not want to do anything, not even start gpm.
+	# created by hwsetup
+	source /etc/sysconfig/gentoo
+	source /etc/sysconfig/mouse
+	einfo "Mouse is ${HILITE}${MOUSE_FULLNAME}${NORMAL} at ${HILITE}${MOUSE_DEVICE}${NORMAL} ..."
+
+	if [ $(grep "#MOUSE=${MOUSETYPE}" /etc/conf.d/gpm) ]; then
+		sed -i "\@MOUSE=${MOUSETYPE}@s@^#@@" /etc/conf.d/gpm
+	else
+		echo "MOUSE=${MOUSETYPE}" >>/etc/conf.d/gpm
+	fi
+
+	if [ $(grep "#MOUSEDEV=${DEVICE}" /etc/conf.d/gpm) ]; then
+		sed -i "\@MOUSEDEV=${DEVICE}@s@^#@@" /etc/conf.d/gpm
+	else
+		echo "MOUSEDEV=${DEVICE}" >>/etc/conf.d/gpm
+	fi
+}
+
+# vim: ft=gentoo-init-d:
