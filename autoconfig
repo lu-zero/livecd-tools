@@ -281,6 +281,7 @@ unpack_firmware() {
 	if [ -e /lib/firmware.tar.bz2 ]
 	then
 		ebegin "Unpacking firmware"
+		mkdir -p /lib/firmware
 		tar xjf /lib/firmware.tar.bz2 -C /lib/firmware
 		eend 0
 	fi
