@@ -458,7 +458,7 @@ start() {
 		# Check whether we should be using hotplug/coldplug or whether we should
 		# just let udev do it all.
 		# coldplug+hotplug would already be up due to list_services
-		if [ ! -x /etc/init.d/coldplug -a ! -x /etc/init.d/hotplug ]
+		if ! rc-service -e coldplug && ! rc-service -e hotplug
 		then
 			# TODO: This needs to go to a seperate script, so that hwsetup can depend on it.
 			unpack_firmware
