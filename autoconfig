@@ -215,7 +215,7 @@ check_svc() {
 		if rc-service -e "${2}"
 		then
 			echo "${2}"
-		elif [ -n "${3}" ] && rc-service -e ${3}"
+		elif [ -n "${3}" ] && rc-service -e "${3}"
 		then
 			echo "${3}"
 		fi	
