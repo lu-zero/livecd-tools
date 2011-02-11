@@ -268,7 +268,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${NFS} nfsmount)"
 	svcs="${svcs} $(check_svc ${PASSWD} pwgen)"
 	svcs="${svcs} $(check_svc ${PCMCIA} pcmcia)"
-	svcs="${svcs} $(check_svc ${SSH} sshd)"
+	svcs="${svcs} $(check_svc ${SSHD} sshd)"
 
 	### TODO: make this baselayout-2 compatible
 	### TODO: make these checks accurate using service dependencies
@@ -504,17 +504,13 @@ start() {
 		einfo "Not Loading ACPI support ..."
 	fi
 
-	if yesno "${IDEDMA}" && ! service_started hdparm
+	if ! yesno "${IDEDMA}"
 	then
-		rc-service -i hdparm start
-	else
 		ewarn "Disabling IDE DMA support ..."
 	fi
 
-	if yesno "${PCMCIA}" && ! service_started pcmcia
+	if ! yesno "${PCMCIA}"
 	then
-		rc-service -i pcmcia start
-	else
 		ewarn "PCMCIA disabled via cmdline ..."
 	fi
 
@@ -567,15 +563,9 @@ start() {
 				fi
 			fi
 		done
-		if yesno "${NFS}" && ! service_started nfsmount
-		then
-			rc-service -i nfsmount start
-		fi
 		if ! yesno "${PASSWD}"
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
-		elif ! service_started pwgen
-			rc-service -i pwgen start
 		fi
 		if yesno "${SSHD}"
 		then
@@ -586,7 +576,6 @@ start() {
 				ewarn "WARNING: You are starting sshd with a scrambled root password!!!"
 				ewarn "WARNING: You need to set a root password to be able to login remotely."
 			fi
-			rc-service -i sshd start
 		fi
 	else
 		ewarn "No Network device auto detected ..."
@@ -604,11 +593,6 @@ start() {
 				&& sndmsg="${sndmsg}              driver = ${SOUND_DRIVER}\n"
 
 			einfo "${sndmsg}"
-
-			if ! service_started alsasound
-			then
-				rc-service -i alsasound start
-			fi
 
 			if [ -e /proc/asound/cards ]
 			then
