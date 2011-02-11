@@ -2,7 +2,7 @@
 
 depend()
 {
-	before dev
+	after procfs
 }
 
 start()
