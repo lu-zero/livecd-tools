@@ -474,7 +474,10 @@ start() {
 	then
 		modprobe apm power_off=1 >/dev/null 2>&1 && \
 			einfo "APM BIOS found, power management functions enabled ..."
-		rc-service -i apmd start
+		if ! service_started apmd
+		then
+			rc-service -i apmd start
+		fi
 	else
 		einfo "Not Loading APM Bios support ..."
 	fi
@@ -491,20 +494,23 @@ start() {
 		modprobe thermal >/dev/null 2>&1
 		modprobe video >/dev/null 2>&1
 		modprobe dock >/dev/null 2>&1
-		rc-service -i acpid start
+		if ! service_started acpid
+		then
+			rc-service -i acpid start
+		fi
 		eend
 	else
 		einfo "Not Loading ACPI support ..."
 	fi
 
-	if yesno "${IDEDMA}"
+	if yesno "${IDEDMA}" && ! service_started hdparm
 	then
 		rc-service -i hdparm start
 	else
 		ewarn "Disabling IDE DMA support ..."
 	fi
 
-	if yesno "${PCMCIA}"
+	if yesno "${PCMCIA}" && ! service_started pcmcia
 	then
 		rc-service -i pcmcia start
 	else
@@ -535,9 +541,12 @@ start() {
 		# Migrated to autoconfig-gpm-pre
 	fi
 
-	[ "${DETECT}" = "no" ] && DHCP="no"
-	[ "${DETECT}" = "yes" ] \
-		&& NETDEVICES="$(awk -F: '/eth.:|tr.:|ath.:|wlan.:/{print $1}' /proc/net/dev 2>/dev/null)"
+	if yesno "${DETECT}"
+	then
+		NETDEVICES="$(awk -F: '/eth.:|tr.:|ath.:|wlan.:/{print $1}' /proc/net/dev 2>/dev/null)"
+	else
+		DHCP="no"
+	fi
 
 	if [ -n "${NETDEVICES}" ]
 	then
@@ -557,16 +566,15 @@ start() {
 				fi
 			fi
 		done
-		if yesno "${NFS}"
+		if yesno "${NFS}" && ! service_started nfsmount
 		then
-			rc-service -i portmap start
 			rc-service -i nfsmount start
 		fi
 		if ! yesno "${PASSWD}"
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
-		else
-			rc-service pwgen start
+		elif ! service_started pwgen
+			rc-service -i pwgen start
 		fi
 		if yesno "${SSHD}"
 		then
@@ -596,7 +604,10 @@ start() {
 
 			einfo "${sndmsg}"
 
-			rc-service -i alsasound start
+			if ! service_started alsasound
+			then
+				rc-service -i alsasound start
+			fi
 
 			if [ -e /proc/asound/cards ]
 			then
