@@ -1,10 +1,13 @@
-This list is split into two alphabetical lists.  The first is a listing of the
-authors of the original Gentoo package.  The copyrights for all of those code
-contributions belong to the Gentoo Foundation.  The second list is the authors
-whom have contributed significant code to the new project.  All code added to
+This list is split into two alphabetical lists. The first is a listing of the
+authors of the original Gentoo package. The copyrights for all of those code
+contributions belong to the Gentoo Foundation. The second list is the authors
+whom have contributed significant code to the new project. All code added to
 the new project is copyrighted by the respective authors.
 
-Gentoo Foundation authors:
+The above paragraph was true until Dec 26, 2009. Then there was a period of
+hiatus and on Feb 10, 2011 development was resumed inside Gentoo.
+
+Original Gentoo Foundation authors:
 ------
 Andrew Gaffney <agaffney@gentoo.org>
 Chris Gianelloni <wolf31o2@gentoo.org>
@@ -19,9 +22,12 @@ Daniel Ostrow <dostrow@gentoo.org>
 Lars Weiler <pylon@gentoo.org>
 Gustavo Zacarias <gustavoz@gentoo.org>
 
-
 Copyright authors:
 ------
 Andrew Gaffney <agaffney@gentoo.org>
 Chris Gianelloni <wolf31o2@wolf31o2.org>
 
+2011-onwards Gentoo authors:
+------
+William Hubbs <williamh@gentoo.org>
+Robin H. Johnson <robbat2@gentoo.org>
