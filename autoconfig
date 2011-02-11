@@ -474,7 +474,7 @@ start() {
 	then
 		modprobe apm power_off=1 >/dev/null 2>&1 && \
 			einfo "APM BIOS found, power management functions enabled ..."
-		[ -x /etc/init.d/apmd ] && /etc/init.d/apmd start
+		rc-service -i apmd start
 	else
 		einfo "Not Loading APM Bios support ..."
 	fi
@@ -491,7 +491,7 @@ start() {
 		modprobe thermal >/dev/null 2>&1
 		modprobe video >/dev/null 2>&1
 		modprobe dock >/dev/null 2>&1
-		[ -x /etc/init.d/acpid ] && /etc/init.d/acpid start
+		rc-service -i acpid start
 		eend
 	else
 		einfo "Not Loading ACPI support ..."
@@ -499,14 +499,14 @@ start() {
 
 	if yesno "${IDEDMA}"
 	then
-		[ -x /etc/init.d/hdparm ] && /etc/init.d/hdparm start
+		rc-service -i hdparm start
 	else
 		ewarn "Disabling IDE DMA support ..."
 	fi
 
 	if yesno "${PCMCIA}"
 	then
-		[ -x /etc/init.d/pcmcia ] && /etc/init.d/pcmcia start
+		rc-service -i pcmcia start
 	else
 		ewarn "PCMCIA disabled via cmdline ..."
 	fi
@@ -559,14 +559,14 @@ start() {
 		done
 		if yesno "${NFS}"
 		then
-			[ -x /etc/init.d/portmap ] && /etc/init.d/portmap start
-			[ -x /etc/init.d/nfsmount ] && /etc/init.d/nfsmount start
+			rc-service -i portmap start
+			rc-service -i nfsmount start
 		fi
 		if ! yesno "${PASSWD}"
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
 		else
-			/etc/init.d/pwgen start
+			rc-service pwgen start
 		fi
 		if yesno "${SSHD}"
 		then
@@ -577,7 +577,7 @@ start() {
 				ewarn "WARNING: You are starting sshd with a scrambled root password!!!"
 				ewarn "WARNING: You need to set a root password to be able to login remotely."
 			fi
-			[ -x /etc/init.d/sshd ] && /etc/init.d/sshd start
+			rc-service -i sshd start
 		fi
 	else
 		ewarn "No Network device auto detected ..."
@@ -596,10 +596,7 @@ start() {
 
 			einfo "${sndmsg}"
 
-			if [ -x /etc/init.d/alsasound ]
-			then
-				/etc/init.d/alsasound start
-			fi
+			rc-service -i alsasound start
 
 			if [ -e /proc/asound/cards ]
 			then
@@ -640,7 +637,7 @@ start() {
 
 				if [ "${SPEAKUP_MODULE}" = "speakup_soft" ]
 				then
-					[ -x /etc/init.d/espeakup ] && /etc/init.d/espeakup start
+					rc-service -i espeakup start
 				fi
 			fi
 		fi
