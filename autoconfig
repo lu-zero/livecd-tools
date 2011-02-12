@@ -201,6 +201,13 @@ get_config() {
 }
 
 depend() {
+	get_config
+
+	if yesno "${SPEAKUP}"
+	then
+		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS} > /dev/null 2>&1
+	fi
+
 	need modules $(list_services)
 	before net
 }
@@ -253,11 +260,6 @@ list_services() {
 				APM="no"
 			;;
 		esac
-	fi
-
-	if yesno "${SPEAKUP}"
-	then
-		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS} 2> /dev/null
 	fi
 
 	local svcs="$(check_svc ${ACPI} acpid)"
