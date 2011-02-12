@@ -255,6 +255,11 @@ list_services() {
 		esac
 	fi
 
+	if yesno "${SPEAKUP}"
+	then
+		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS} 2> /dev/null
+	fi
+
 	local svcs="$(check_svc ${ACPI} acpid)"
 	svcs="${svcs} $(check_svc ${ALSA} alsasound)"
 	svcs="${svcs} $(check_svc ${ALSA} unmute)"
@@ -404,11 +409,6 @@ detect_sparc() {
 start() {
 	echo "0" > /proc/sys/kernel/printk
 	get_config
-
-	if yesno "${SPEAKUP}"
-	then
-		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS}
-	fi
 
 	if yesno "${DETECT}"
 	then
