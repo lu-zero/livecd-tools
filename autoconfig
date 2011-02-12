@@ -582,14 +582,12 @@ start() {
 	then
 		if [ -n "${SOUND_FULLNAME}" -o -n "${SOUND_DRIVER}" ]
 		then
-			local sndmsg="Soundcard:\n"
+			einfo "Soundcard:  "
 
 			[ -n "${SOUND_FULLNAME}" ] \
-				&& sndmsg="${sndmsg}              ${WARN}${SOUND_FULLNAME}\n"
+				&& einfo "              ${WARN}${SOUND_FULLNAME}  "
 			[ -n "${SOUND_DRIVER}" ] \
-				&& sndmsg="${sndmsg}              driver = ${SOUND_DRIVER}\n"
-
-			einfo "${sndmsg}"
+				&& einfo "              driver = ${SOUND_DRIVER}"
 
 			if [ -e /proc/asound/cards ]
 			then
