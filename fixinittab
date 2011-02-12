@@ -2,7 +2,7 @@
 
 depend()
 {
-	after dev
+	after root
 }
 
 start()
@@ -12,6 +12,7 @@ start()
 		return 1
 	fi
 
+	einfo "adjusting inittab"
 	# Create a backup
 	cp -f /etc/inittab /etc/inittab.old
 
@@ -64,7 +65,6 @@ start()
 			echo "s0:12345:respawn:/sbin/agetty -nl /bin/bashlogin 9600 hvc0 vt320" >> /etc/inittab
 		fi
 
-
 	# The rest...
 	else
 		if [ "${LIVECD_CONSOLE}" = "tty0" -o "${LIVECD_CONSOLE}" = "" ]
@@ -96,5 +96,7 @@ start()
 
 	# force reread of inittab
 	telinit q
+
+	eend 0
 	return 0
 }
