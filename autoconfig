@@ -593,7 +593,6 @@ start() {
 				&& einfo "              ${WARN}${SOUND_FULLNAME}  "
 			[ -n "${SOUND_DRIVER}" ] \
 				&& einfo "              driver = ${SOUND_DRIVER}"
-			fi
 		fi
 	else
 		ewarn "Skipping ALSA detection as requested on command line ..."
