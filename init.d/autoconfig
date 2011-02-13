@@ -410,6 +410,7 @@ detect_sparc() {
 }
 
 start() {
+	einfo "starting autoconfig"
 	echo "0" > /proc/sys/kernel/printk
 	get_config
 
