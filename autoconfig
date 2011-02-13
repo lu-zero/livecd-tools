@@ -278,6 +278,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${PASSWD} pwgen)"
 	svcs="${svcs} $(check_svc ${PCMCIA} pcmcia)"
 	svcs="${svcs} $(check_svc ${SSHD} sshd)"
+	svcs="${svcs} $(check_svc ${X11} xdm)"
 
 	### TODO: make this baselayout-2 compatible
 	### TODO: make these checks accurate using service dependencies
@@ -601,11 +602,6 @@ start() {
 	fi
 
 	[ -n "${XDESC}" ] && einfo "VideoCard:   ${HILITE}${XDESC}${NORMAL}"
-
-	if ! yesno "${X11}"
-	then
-		touch /etc/.noxdm
-	fi
 
 	killall hwsetup 2>/dev/null
 	echo "6" > /proc/sys/kernel/printk
