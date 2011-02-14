@@ -3,11 +3,6 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-# Do one of the following:
-# Add to /etc/rc.conf: rc_gpm_need="autoconfig-gpm-pre"
-# XOR
-# Add to /etc/conf.d/gpm: rc_need="autoconfig-gpm-pre"
-
 depend() {
 	before gpm
 	need hwsetup

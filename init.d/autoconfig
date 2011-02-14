@@ -272,6 +272,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${APM} apmd)"
 	svcs="${svcs} $(check_svc ${BRLTTY} brltty)"
 	svcs="${svcs} $(check_svc ${COLDPLUG} coldplug hotplug)"
+	svcs="${svcs} $(check_svc ${GPM} gpm-pre)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
 	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
 	svcs="${svcs} $(check_svc ${NFS} nfsmount)"
