@@ -272,6 +272,10 @@ list_services() {
 	svcs="${svcs} $(check_svc ${APM} apmd)"
 	svcs="${svcs} $(check_svc ${BRLTTY} brltty)"
 	svcs="${svcs} $(check_svc ${COLDPLUG} coldplug hotplug)"
+	if yesno "$COLDPLUG" && ! rc-service -e coldplug && ! rc-service -e hotplug
+	then
+		echo firmware hwsetup
+	fi
 	svcs="${svcs} $(check_svc ${GPM} gpm-pre)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
 	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
@@ -285,17 +289,6 @@ list_services() {
 	### TODO: make these checks accurate using service dependencies
 
 	echo ${svcs}
-}
-
-unpack_firmware() {
-	# This unpacks any firmware tarballs.
-	if [ -e /lib/firmware.tar.bz2 ]
-	then
-		ebegin "Unpacking firmware"
-		mkdir -p /lib/firmware
-		tar xjf /lib/firmware.tar.bz2 -C /lib/firmware
-		eend 0
-	fi
 }
 
 get_info() {
@@ -460,21 +453,8 @@ start() {
 		ewarn "Hardware detection disabled via cmdline ..."
 	fi
 
-	# Now, we check if we are supposed to run a coldplug script.
-	if yesno "${COLDPLUG}"
+	if ! yesno "${COLDPLUG}"
 	then
-		# Check whether we should be using hotplug/coldplug or whether we should
-		# just let udev do it all.
-		# coldplug+hotplug would already be up due to list_services
-		if ! rc-service -e coldplug && ! rc-service -e hotplug
-		then
-			# TODO: This needs to go to a seperate script, so that hwsetup can depend on it.
-			unpack_firmware
-			[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
-		fi
-		[ -e /etc/sysconfig ] || mkdir -p /etc/sysconfig
-		[ -x /usr/sbin/hwsetup ] && hwsetup
-	else
 		ewarn "Hotplug/Coldplug disabled via cmdline ..."
 	fi
 

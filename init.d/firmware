@@ -1,0 +1,22 @@
+#!/sbin/runscript
+# Copyright 1999-2011 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# This unpacks any firmware tarballs.
+
+depend() {
+	:
+}
+
+start() {
+einfo checking for firmware to unpack
+	if [ -e /lib/firmware.tar.bz2 ]
+	then
+		ebegin "Unpacking firmware"
+		mkdir -p /lib/firmware
+		tar xjf /lib/firmware.tar.bz2 -C /lib/firmware
+		eend 0
+	fi
+	[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
+}
