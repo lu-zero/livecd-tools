@@ -18,5 +18,5 @@ einfo checking for firmware to unpack
 		tar xjf /lib/firmware.tar.bz2 -C /lib/firmware
 		eend 0
 	fi
-	[ -x /sbin/udevtrigger ] && /sbin/udevtrigger
+	[ -x /sbin/udevadm ] && /sbin/udevadm trigger
 }
