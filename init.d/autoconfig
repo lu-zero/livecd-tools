@@ -587,9 +587,13 @@ start() {
 
 	killall hwsetup 2>/dev/null
 	echo "6" > /proc/sys/kernel/printk
-	splash_manager -c set -t livecd-10 -m v > /dev/null 2>&1
-	reset
-	chvt 1
+
+	if yesno "${SPEAKUP}"
+	then
+		splash_manager -c set -t livecd-10 -m v > /dev/null 2>&1
+		reset
+		chvt 1
+	fi
 }
 
 # vim: ts=4
