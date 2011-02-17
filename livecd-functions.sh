@@ -146,19 +146,19 @@ livecd_config_wireless() {
 	cd /tmp/setup.opts
 	[ -x /usr/sbin/iwconfig ] && iwconfig=/usr/sbin/iwconfig
 	[ -x /sbin/iwconfig ] && iwconfig=/sbin/iwconfig
-	dialog --title "SSID" --inputbox "Please enter your SSID, or leave blank for selecting the nearest open network" 20 50 2> ${iface}.SSID
+	dialog --visit-items --title "SSID" --inputbox "Please enter your SSID, or leave blank for selecting the nearest open network" 20 50 2> ${iface}.SSID
 	SSID=$(tail -n 1 ${iface}.SSID)
 	if [ -n "${SSID}" ]
 	then
-		dialog --title "WEP (Part 1)" --menu "Does your network use encryption?" 20 60 7 1 "Yes" 2 "No" 2> ${iface}.WEP
+		dialog --visit-items --title "WEP (Part 1)" --menu "Does your network use encryption?" 20 60 7 1 "Yes" 2 "No" 2> ${iface}.WEP
 		WEP=$(tail -n 1 ${iface}.WEP)
 		case ${WEP} in
 			1)
-				dialog --title "WEP (Part 2)" --menu "Are you entering your WEP key in HEX or ASCII?" 20 60 7 1 "HEX" 2 "ASCII" 2> ${iface}.WEPTYPE
+				dialog --visit-items --title "WEP (Part 2)" --menu "Are you entering your WEP key in HEX or ASCII?" 20 60 7 1 "HEX" 2 "ASCII" 2> ${iface}.WEPTYPE
 				WEP_TYPE=$(tail -n 1 ${iface}.WEPTYPE)
 				case ${WEP_TYPE} in
 					1)
-						dialog --title "WEP (Part 3)" --inputbox "Please enter your WEP key in the form of XXXX-XXXX-XX for 64-bit or XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX for 128-bit" 20 50 2> ${iface}.WEPKEY
+						dialog --visit-items --title "WEP (Part 3)" --inputbox "Please enter your WEP key in the form of XXXX-XXXX-XX for 64-bit or XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX for 128-bit" 20 50 2> ${iface}.WEPKEY
 						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
@@ -167,7 +167,7 @@ livecd_config_wireless() {
 						fi
 					;;
 					2)
-						dialog --title "WEP (Part 3)" --inputbox "Please enter your WEP key in ASCII form.  This should be 5 or 13 characters for either 64-bit or 128-bit encryption, repectively" 20 50 2> ${iface}.WEPKEY
+						dialog --visit-items --title "WEP (Part 3)" --inputbox "Please enter your WEP key in ASCII form.  This should be 5 or 13 characters for either 64-bit or 128-bit encryption, repectively" 20 50 2> ${iface}.WEPKEY
 						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
@@ -224,23 +224,23 @@ livecd_write_wireless_conf() {
 
 livecd_config_ip() {
 	cd /tmp/setup.opts
-	dialog --title "TCP/IP setup" --menu "You can use DHCP to automatically configure a network interface or you can specify an IP and related settings manually. Choose one option:" 20 60 7 1 "Use DHCP to auto-detect my network settings" 2 "Specify an IP address manually" 2> ${iface}.DHCP
+	dialog --visit-items --title "TCP/IP setup" --menu "You can use DHCP to automatically configure a network interface or you can specify an IP and related settings manually. Choose one option:" 20 60 7 1 "Use DHCP to auto-detect my network settings" 2 "Specify an IP address manually" 2> ${iface}.DHCP
 	DHCP=$(tail -n 1 ${iface}.DHCP)
 	case ${DHCP} in
 		1)
 			/sbin/dhcpcd -n -t 10 -h $(hostname) ${iface} &
 		;;
 		2)
-			dialog --title "IP address" --inputbox "Please enter an IP address for ${iface}:" 20 50 "192.168.1.1" 2> ${iface}.IP
+			dialog --visit-items --title "IP address" --inputbox "Please enter an IP address for ${iface}:" 20 50 "192.168.1.1" 2> ${iface}.IP
 			IP=$(tail -n 1 ${iface}.IP)
 			BC_TEMP=$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255
-			dialog --title "Broadcast address" --inputbox "Please enter a Broadcast address for ${iface}:" 20 50 "${BC_TEMP}" 2> ${iface}.BC
+			dialog --visit-items --title "Broadcast address" --inputbox "Please enter a Broadcast address for ${iface}:" 20 50 "${BC_TEMP}" 2> ${iface}.BC
 			BROADCAST=$(tail -n 1 ${iface}.BC)
-			dialog --title "Network mask" --inputbox "Please enter a Network Mask for ${iface}:" 20 50 "255.255.255.0" 2> ${iface}.NM
+			dialog --visit-items --title "Network mask" --inputbox "Please enter a Network Mask for ${iface}:" 20 50 "255.255.255.0" 2> ${iface}.NM
 			NETMASK=$(tail -n 1 ${iface}.NM)
-			dialog --title "Gateway" --inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" 20 50 2> ${iface}.GW
+			dialog --visit-items --title "Gateway" --inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" 20 50 2> ${iface}.GW
 			GATEWAY=$(tail -n 1 ${iface}.GW)
-			dialog --title "DNS server" --inputbox "Please enter a name server to use (hit enter for none:)" 20 50 2> ${iface}.DNS
+			dialog --visit-items --title "DNS server" --inputbox "Please enter a name server to use (hit enter for none:)" 20 50 2> ${iface}.DNS
 			DNS=$(tail -n 1 ${iface}.DNS)
 			/sbin/ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
 			if [ -n "${GATEWAY}" ]
@@ -249,7 +249,7 @@ livecd_config_ip() {
 			fi
 			if [ -n "${DNS}" ]
 			then
-				dialog --title "DNS Search Suffix" --inputbox "Please enter any domains which you would like to search on DNS queries (hit enter for none:)" 20 50 2> ${iface}.SUFFIX
+				dialog --visit-items --title "DNS Search Suffix" --inputbox "Please enter any domains which you would like to search on DNS queries (hit enter for none:)" 20 50 2> ${iface}.SUFFIX
 				SUFFIX=$(tail -n 1 ${iface}.SUFFIX)
 				echo "nameserver ${DNS}" > /etc/resolv.conf
 				if [ -n "${SUFFIX}" ]
@@ -393,7 +393,7 @@ show_ifmenu() {
 	done
 	IFS="${old_ifs}"
 
-	if ! eval dialog --menu "Please select the interface that you wish to configure from the list below:" 0 0 0 $opts 2>iface
+	if ! eval dialog --visit-items --menu "Please select the interface that you wish to configure from the list below:" 0 0 0 $opts 2>iface
 	then
 		exit
 	fi
@@ -415,7 +415,7 @@ show_ifconfirm() {
 	[[ -n ${if_bus} ]] && text="${text}Bus type: ${if_bus}\n"
 	text="${text}\nIs this the interface that you wish to configure?"
 
-	if ! dialog --title "Interface details" --yesno "${text}" 15 70
+	if ! dialog --visit-items --title "Interface details" --yesno "${text}" 15 70
 	then
 		result="no"
 	else
