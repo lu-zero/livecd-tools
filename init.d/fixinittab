@@ -19,6 +19,7 @@ start()
 	# Comment out current getty settings
 	sed -i -e '/^c[0-9]/ s/^/#/' /etc/inittab
 	sed -i -e '/^s[01]/ s/^/#/' /etc/inittab
+	sed -i -e '/^b0/ s/^/#/' /etc/inittab
 
 	# SPARC & HPPA console magic
 	if [ "${HOSTTYPE}" = "sparc" -o "${HOSTTYPE}" = "hppa" -o "${HOSTTYPE}" = "ppc64" ]
