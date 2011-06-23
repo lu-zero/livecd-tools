@@ -3,34 +3,6 @@
 # This script is used by Gentoo release media to start certain services and to
 # ensure a sane setup for a CD-based boot.
 
-ACPI="yes"
-ALSA="yes"
-APM="no"
-BRLTTY="no"
-COLDPLUG="yes"
-DETECT="yes"
-DHCP="yes"
-DMRAID="yes"
-EVMS="no"
-FIREWIRE="yes"
-GPM="yes"
-IDEDMA="yes"
-LVM="no"
-MDADM="yes"
-NET="yes"
-NFS="yes"
-PASSWD="yes"
-PATA="yes"
-PCMCIA="yes"
-SATA="yes"
-SCSI="no"
-SPEAKUP="no"
-SPEAKUP_MODULE=""
-SPEAKUP_OPTIONS=""
-SSHD="no"
-USB="yes"
-X11="yes"
-
 get_config() {
 	CMDLINE="$(cat /proc/cmdline)"
 
@@ -200,18 +172,6 @@ get_config() {
 	done
 }
 
-depend() {
-	get_config
-
-	if yesno "${SPEAKUP}"
-	then
-		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS} > /dev/null 2>&1
-	fi
-
-	need modules $(list_services)
-	before net
-}
-
 # Checks whether a service will be started by autoconfig.
 # Usage: check_svc var service [service_alternative]
 check_svc() {
@@ -289,6 +249,18 @@ list_services() {
 	### TODO: make these checks accurate using service dependencies
 
 	echo ${svcs}
+}
+
+depend() {
+	before net
+
+	get_config
+	if yesno "${SPEAKUP}"
+	then
+		modprobe ${SPEAKUP_MODULE} ${SPEAKUP_OPTIONS} > /dev/null 2>&1
+	fi
+
+	need modules $(list_services)
 }
 
 get_info() {
