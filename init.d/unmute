@@ -11,7 +11,7 @@ start()
 	then
 		for i in $(cat /proc/asound/cards | awk '{print $1}' | grep ^[[:digit:]])
 		do
-			einfo "unmuting sound card $i"
+			einfo "Unmuting sound card $i ..."
 			if [ -d /proc/asound/card$i ] && [ -x /usr/bin/amixer ]
 			then
 				amixer -c $i scontrols > /etc/amixer

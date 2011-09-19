@@ -12,7 +12,7 @@ start()
 		return 1
 	fi
 
-	einfo "adjusting inittab"
+	einfo "Adjusting inittab ..."
 	# Create a backup
 	cp -f /etc/inittab /etc/inittab.old
 
@@ -62,7 +62,7 @@ start()
 		fi
 		if [ -c "/dev/hvc0" ]
 		then
-			einfo "Adding hvc console to inittab"
+			einfo "Adding hvc console to inittab ..."
 			echo "s0:12345:respawn:/sbin/agetty -nl /bin/bashlogin 9600 hvc0 vt320" >> /etc/inittab
 		fi
 
@@ -75,7 +75,7 @@ start()
 				echo "c${x}:12345:respawn:/sbin/mingetty --noclear --autologin root tty${x}" >> /etc/inittab
 			done
 		else
-			einfo "Adding ${LIVECD_CONSOLE} console to inittab"
+			einfo "Adding ${LIVECD_CONSOLE} console to inittab ..."
 			echo "s0:12345:respawn:/sbin/agetty -nl /bin/bashlogin ${LIVECD_CONSOLE_BAUD} ${LIVECD_CONSOLE} vt100" >> /etc/inittab
 		fi
 	fi
