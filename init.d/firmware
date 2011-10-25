@@ -10,13 +10,16 @@ depend() {
 }
 
 start() {
-einfo "Checking for firmware to unpack ..."
+	ebegin "Checking for firmware to unpack"
 	if [ -e /lib/firmware.tar.bz2 ]
 	then
-		ebegin "Unpacking firmware ..."
+		eindent
+		ebegin "Unpacking firmware"
 		mkdir -p /lib/firmware
 		tar xjf /lib/firmware.tar.bz2 -C /lib/firmware
 		eend 0
+		eoutdent
 	fi
 	[ -x /sbin/udevadm ] && /sbin/udevadm trigger
+	eend $?
 }

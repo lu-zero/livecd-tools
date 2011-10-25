@@ -376,12 +376,13 @@ detect_sparc() {
 }
 
 start() {
-	einfo "Starting autoconfig ..."
+	ebegin "Starting autoconfig"
 	echo "0" > /proc/sys/kernel/printk
 	get_config
 
 	if yesno "${DETECT}"
 	then
+		eindent
 		ebegin "Hardware detection started"
 			local numcpu="$(grep -c '^processor[[:space:]]\+:' /proc/cpuinfo)"
 			local arch="$(uname -m)"
@@ -421,6 +422,7 @@ start() {
 			esac
 			[ -n "${PC}" ] && einfo "${PC}"
 		eend
+		eoutdent
 	else
 		ewarn "Hardware detection disabled via cmdline ..."
 	fi
@@ -567,6 +569,7 @@ start() {
 		reset
 		chvt 1
 	fi
+	eend $?
 }
 
 # vim: ts=4

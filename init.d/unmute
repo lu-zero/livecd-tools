@@ -11,7 +11,7 @@ start()
 	then
 		for i in $(cat /proc/asound/cards | awk '{print $1}' | grep ^[[:digit:]])
 		do
-			einfo "Unmuting sound card $i ..."
+			ebegin "Unmuting sound card $i"
 			if [ -d /proc/asound/card$i ] && [ -x /usr/bin/amixer ]
 			then
 				amixer -c $i scontrols > /etc/amixer
@@ -43,6 +43,7 @@ start()
 					&& amixer -c $i -q set Capture 95% unmute cap \
 					>/dev/null 2>&1
 			fi
+			eend 0
 		done
 	fi
 	return 0
