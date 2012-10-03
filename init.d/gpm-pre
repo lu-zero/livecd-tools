@@ -9,10 +9,12 @@ depend() {
 }
 
 start() {
-	# FIXME: If MOUSE_DEVICE is empty, we actually do not want to do anything, not even start gpm.
-	# created by hwsetup
-	source /etc/sysconfig/gentoo
-	source /etc/sysconfig/mouse
+	[ -f /etc/sysconfig/gentoo ] && source /etc/sysconfig/gentoo
+	[ -f /etc/sysconfig/mouse ] && source /etc/sysconfig/mouse
+	if [ -z "${MOUSE_DEVICE}" ]; then
+		ewarn "No mouse detected. GPM will not be started."
+		return 0
+	fi
 	einfo "Mouse is ${HILITE}${MOUSE_FULLNAME}${NORMAL} at ${HILITE}${MOUSE_DEVICE}${NORMAL} ..."
 
 	if [ $(grep "#MOUSE=${MOUSETYPE}" /etc/conf.d/gpm) ]; then
