@@ -34,14 +34,14 @@ start()
 		if [ -c "/dev/ttyS0" ]
 		then
 			LIVECD_CONSOLE_BAUD=$(stty -F /dev/ttyS0 speed)
-			echo "s0:12345:respawn:/sbin/agetty -nl /bin/bashlogin ${LIVECD_CONSOLE_BAUD} ttyS0 vt100" >> /etc/inittab
+			echo "s0:12345:respawn:/sbin/agetty -a root ${LIVECD_CONSOLE_BAUD} ttyS0 vt100" >> /etc/inittab
 		fi
 		# HPPA software PDC console (K-models)
 		if [ "${LIVECD_CONSOLE}" = "ttyB0" ]
 		then
 			mknod /dev/ttyB0 c 11 0
 			LIVECD_CONSOLE_BAUD=$(stty -F /dev/ttyB0 speed)
-			echo "b0:12345:respawn:/sbin/agetty -nl /bin/bashlogin ${LIVECD_CONSOLE_BAUD} ttyB0 vt100" >> /etc/inittab
+			echo "b0:12345:respawn:/sbin/agetty -a root ${LIVECD_CONSOLE_BAUD} ttyB0 vt100" >> /etc/inittab
 		fi
 		# FB / STI console
 		if [ -c "/dev/vc/1" -o -c "/dev/tts/1" -o -c "/dev/tty2" ]
@@ -64,7 +64,7 @@ start()
 		then
 			eindent
 			ebegin "Adding hvc console to inittab ..."
-			echo "s0:12345:respawn:/sbin/agetty -nl /bin/bashlogin 9600 hvc0 vt320" >> /etc/inittab
+			echo "s0:12345:respawn:/sbin/agetty -a root 9600 hvc0 vt320" >> /etc/inittab
 			eend $?
 			eoutdent
 		fi
@@ -80,7 +80,7 @@ start()
 		else
 			eindent
 			ebegin "Adding ${LIVECD_CONSOLE} console to inittab"
-			echo "s0:12345:respawn:/sbin/agetty -nl /bin/bashlogin ${LIVECD_CONSOLE_BAUD} ${LIVECD_CONSOLE} vt100" >> /etc/inittab
+			echo "s0:12345:respawn:/sbin/agetty -a root ${LIVECD_CONSOLE_BAUD} ${LIVECD_CONSOLE} vt100" >> /etc/inittab
 			eend $?
 			eoutdent
 		fi
@@ -97,7 +97,7 @@ start()
 				*options\ \'[0-9]*) speed=`echo "$x" | sed "s/.*options '//; s/[^0-9].*//"` ;;
 				*) speed=9600 ;;  # choose a default, only matters if it is serial
 			esac
-			echo "$id:12345:respawn:/sbin/agetty -nl /bin/bashlogin ${speed} ${line} vt100" >> /etc/inittab
+			echo "$id:12345:respawn:/sbin/agetty -a root ${speed} ${line} vt100" >> /etc/inittab
 		done
 	fi
 
