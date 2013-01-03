@@ -508,22 +508,16 @@ start() {
 
 	if [ -n "${NETDEVICES}" ]
 	then
-		for nics in ${NETDEVICES}
-		do
-			if yesno "${DHCP}"
+		if yesno "${DHCP}"
+		then
+			einfo "DHCP broadcasting for IP on all detected interfaces ..."
+			if [ -f /var/run/dhcpcd.pid ]
 			then
-				einfo "Network device ${HILITE}${nics}${NORMAL} detected, DHCP broadcasting for IP ..."
-				if [ -f /var/run/dhcpcd-${nics}.pid ]
-				then
-					if [ -z "$(/sbin/ifconfig ${nics} | grep 'inet addr')" ]
-					then
-						kill $(cat /var/run/dhcpcd-${nics}.pid)
-						sleep 2
-						dhcpcd -n -h $(hostname) ${nics}
-					fi
-				fi
+				kill $(cat /var/run/dhcpcd.pid)
+				sleep 2
 			fi
-		done
+			dhcpcd -n -h $(hostname)
+		fi
 		if ! yesno "${PASSWD}"
 		then
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
