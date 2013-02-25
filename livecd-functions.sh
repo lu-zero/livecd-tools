@@ -245,7 +245,7 @@ livecd_config_ip() {
 			ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
 			if [ -n "${GATEWAY}" ]
 			then
-				/sbin/route add default gw ${GATEWAY} dev ${iface} netmask 0.0.0.0 metric 1
+				route add default gw ${GATEWAY} dev ${iface} netmask 0.0.0.0 metric 1
 			fi
 			if [ -n "${DNS}" ]
 			then
