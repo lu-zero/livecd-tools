@@ -80,8 +80,7 @@ nv_no_gl() {
 }
 
 get_video_cards() {
-	[ -x /sbin/lspci ] && VIDEO_CARDS=$(/sbin/lspci | grep ' VGA ')
-	[ -x /usr/sbin/lspci ] && VIDEO_CARDS=$(/usr/sbin/lspci | grep ' VGA ')
+	VIDEO_CARDS=$(lspci | grep ' VGA ')
 	NUM_CARDS=$(echo ${VIDEO_CARDS} | wc -l)
 	if [ ${NUM_CARDS} -eq 1 ]
 	then
@@ -144,8 +143,6 @@ get_video_cards() {
 
 livecd_config_wireless() {
 	cd /tmp/setup.opts
-	[ -x /usr/sbin/iwconfig ] && iwconfig=/usr/sbin/iwconfig
-	[ -x /sbin/iwconfig ] && iwconfig=/sbin/iwconfig
 	dialog --visit-items --title "SSID" --inputbox "Please enter your SSID, or leave blank for selecting the nearest open network" 20 50 2> ${iface}.SSID
 	SSID=$(tail -n 1 ${iface}.SSID)
 	if [ -n "${SSID}" ]
@@ -162,8 +159,8 @@ livecd_config_wireless() {
 						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
-							${iwconfig} ${iface} essid "${SSID}"
-							${iwconfig} ${iface} key "${WEP_KEY}"
+							iwconfig ${iface} essid "${SSID}"
+							iwconfig ${iface} key "${WEP_KEY}"
 						fi
 					;;
 					2)
@@ -171,15 +168,15 @@ livecd_config_wireless() {
 						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
 						if [ -n "${WEP_KEY}" ]
 						then
-							${iwconfig} ${iface} essid "${SSID}"
-							${iwconfig} ${iface} key "s:${WEP_KEY}"
+							iwconfig ${iface} essid "${SSID}"
+							iwconfig ${iface} key "s:${WEP_KEY}"
 						fi
 					;;
 				esac
 			;;
 			2)
-				${iwconfig} ${iface} essid "${SSID}"
-				${iwconfig} ${iface} key off
+				iwconfig ${iface} essid "${SSID}"
+				iwconfig ${iface} key off
 			;;
 		esac
 	fi
