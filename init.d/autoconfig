@@ -375,6 +375,17 @@ detect_sparc() {
 	PC="Detected ${numcpu} active ${cpuinfo} CPU(s) of ${numprobed} total"
 }
 
+detect_netdevices() {
+	for dev in /sys/class/net/*; do
+		n="$(basename $dev)"
+		case "$n" in
+		lo|sit0) continue ;;
+		*) echo $n
+		esac
+	done
+	return 0
+}
+
 start() {
 	ebegin "Starting autoconfig"
 	echo "0" > /proc/sys/kernel/printk
@@ -501,7 +512,7 @@ start() {
 
 	if yesno "${DETECT}"
 	then
-		NETDEVICES="$(awk -F: '/eth.:|tr.:|ath.:|wlan.:/{print $1}' /proc/net/dev 2>/dev/null)"
+		NETDEVICES="$(detect_netdevices)"
 	else
 		DHCP="no"
 	fi
