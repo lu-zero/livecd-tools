@@ -14,7 +14,10 @@ start()
 
 	ebegin "Adjusting inittab"
 	# Create a backup
-	cp -f /etc/inittab /etc/inittab.old
+	if [ ! -e /etc/inittab.old ]
+	then
+		cp -f /etc/inittab /etc/inittab.old
+	fi
 
 	# Comment out current getty settings
 	sed -i -e '/^c[0-9]/ s/^/#/' /etc/inittab
