@@ -1,5 +1,190 @@
 #!/bin/bash
 
+show_ifmenu() {
+	local old_ifs="${IFS}"
+	local opts
+	IFS="
+"
+	for ifname in $(ifconfig -a | grep "^[^ ]"); do
+		ifname="${ifname%% *}"
+		[[ ${ifname} == "lo" ]] && continue
+		opts="${opts} ${ifname} '$(get_ifdesc ${ifname})'"
+	done
+	IFS="${old_ifs}"
+
+	if ! eval dialog --visit-items --menu "Please select the interface that you wish to configure from the list below:" 0 0 0 $opts 2>iface
+	then
+		exit
+	fi
+
+	iface=$(< iface)
+}
+
+show_ifconfirm() {
+	local iface=$1
+	local if_mac=$(get_ifmac ${iface})
+	local if_driver=$(get_ifdriver ${iface})
+	local if_bus=$(get_ifbus ${iface})
+	local if_product=$(get_ifproduct ${iface})
+
+	local text="Details for network interface ${iface} are shown below.\n\nInterface name: ${iface}\n"
+	[[ -n ${if_product} ]] && text="${text}Device: ${if_product}\n"
+	[[ -n ${if_mac} ]] && text="${text}MAC address: ${if_mac}\n"
+	[[ -n ${if_driver} ]] && text="${text}Driver: ${if_driver}\n"
+	[[ -n ${if_bus} ]] && text="${text}Bus type: ${if_bus}\n"
+	text="${text}\nIs this the interface that you wish to configure?"
+
+	if ! dialog --visit-items --title "Interface details" --yesno "${text}" 15 70
+	then
+		result="no"
+	else
+		result="yes"
+	fi
+}
+
+config_wireless() {
+	cd /tmp/setup.opts
+	dialog --visit-items --title "SSID" --inputbox "Please enter your SSID, or leave blank for selecting the nearest open network" 20 50 2> ${iface}.SSID
+	SSID=$(tail -n 1 ${iface}.SSID)
+	if [ -n "${SSID}" ]
+	then
+		dialog --visit-items --title "WEP (Part 1)" --menu "Does your network use encryption?" 20 60 7 1 "Yes" 2 "No" 2> ${iface}.WEP
+		WEP=$(tail -n 1 ${iface}.WEP)
+		case ${WEP} in
+			1)
+				dialog --visit-items --title "WEP (Part 2)" --menu "Are you entering your WEP key in HEX or ASCII?" 20 60 7 1 "HEX" 2 "ASCII" 2> ${iface}.WEPTYPE
+				WEP_TYPE=$(tail -n 1 ${iface}.WEPTYPE)
+				case ${WEP_TYPE} in
+					1)
+						dialog --visit-items --title "WEP (Part 3)" --inputbox "Please enter your WEP key in the form of XXXX-XXXX-XX for 64-bit or XXXX-XXXX-XXXX-XXXX-XXXX-XXXX-XX for 128-bit" 20 50 2> ${iface}.WEPKEY
+						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
+						if [ -n "${WEP_KEY}" ]
+						then
+							iwconfig ${iface} essid "${SSID}"
+							iwconfig ${iface} key "${WEP_KEY}"
+						fi
+					;;
+					2)
+						dialog --visit-items --title "WEP (Part 3)" --inputbox "Please enter your WEP key in ASCII form.  This should be 5 or 13 characters for either 64-bit or 128-bit encryption, repectively" 20 50 2> ${iface}.WEPKEY
+						WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
+						if [ -n "${WEP_KEY}" ]
+						then
+							iwconfig ${iface} essid "${SSID}"
+							iwconfig ${iface} key "s:${WEP_KEY}"
+						fi
+					;;
+				esac
+			;;
+			2)
+				iwconfig ${iface} essid "${SSID}"
+				iwconfig ${iface} key off
+			;;
+		esac
+	fi
+}
+
+config_ip() {
+	cd /tmp/setup.opts
+	dialog --visit-items --title "TCP/IP setup" --menu "You can use DHCP to automatically configure a network interface or you can specify an IP and related settings manually. Choose one option:" 20 60 7 1 "Use DHCP to auto-detect my network settings" 2 "Specify an IP address manually" 2> ${iface}.DHCP
+	DHCP=$(tail -n 1 ${iface}.DHCP)
+	case ${DHCP} in
+		1)
+			/sbin/dhcpcd -n -t 10 -h $(hostname) ${iface} &
+		;;
+		2)
+			dialog --visit-items --title "IP address" --inputbox "Please enter an IP address for ${iface}:" 20 50 "192.168.1.1" 2> ${iface}.IP
+			IP=$(tail -n 1 ${iface}.IP)
+			BC_TEMP=$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255
+			dialog --visit-items --title "Broadcast address" --inputbox "Please enter a Broadcast address for ${iface}:" 20 50 "${BC_TEMP}" 2> ${iface}.BC
+			BROADCAST=$(tail -n 1 ${iface}.BC)
+			dialog --visit-items --title "Network mask" --inputbox "Please enter a Network Mask for ${iface}:" 20 50 "255.255.255.0" 2> ${iface}.NM
+			NETMASK=$(tail -n 1 ${iface}.NM)
+			dialog --visit-items --title "Gateway" --inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" 20 50 2> ${iface}.GW
+			GATEWAY=$(tail -n 1 ${iface}.GW)
+			dialog --visit-items --title "DNS server" --inputbox "Please enter a name server to use (hit enter for none:)" 20 50 2> ${iface}.DNS
+			DNS=$(tail -n 1 ${iface}.DNS)
+			ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
+			if [ -n "${GATEWAY}" ]
+			then
+				route add default gw ${GATEWAY} dev ${iface} netmask 0.0.0.0 metric 1
+			fi
+			if [ -n "${DNS}" ]
+			then
+				dialog --visit-items --title "DNS Search Suffix" --inputbox "Please enter any domains which you would like to search on DNS queries (hit enter for none:)" 20 50 2> ${iface}.SUFFIX
+				SUFFIX=$(tail -n 1 ${iface}.SUFFIX)
+				echo "nameserver ${DNS}" > /etc/resolv.conf
+				if [ -n "${SUFFIX}" ]
+				then
+					echo "search ${SUFFIX}" >> /etc/resolv.conf
+				fi
+			fi
+		;;
+	esac
+}
+
+write_wireless_conf() {
+	cd /tmp/setup.opts
+	SSID=$(tail -n 1 ${iface}.SSID)
+	if [ -n "${SSID}" ]
+	then
+		echo "" >> /etc/conf.d/net
+		echo "# This wireless configuration file was built by net-setup" > /etc/conf.d/net
+		WEP=$(tail -n 1 ${iface}.WEPTYPE)
+		case ${WEP} in
+			1)
+				WEP_TYPE=$(tail -n 1 ${iface}.WEPTYPE)
+				if [ -n "${WEP_TYPE}" ]
+				then
+					WEP_KEY=$(tail -n 1 ${iface}.WEPKEY)
+					if [ -n "${WEP_KEY}" ]
+					then
+						SSID_TRANS=$(echo ${SSID//[![:word:]]/_})
+						case ${WEP_TYPE} in
+							1)
+								echo "key_${SSID_TRANS}=\"${WEP_KEY} enc open\"" >> /etc/conf.d/net
+							;;
+							2)
+								echo "key_${SSID_TRANS}=\"s:${WEP_KEY} enc open\"" >> /etc/conf.d/net
+							;;
+						esac
+					fi
+				fi
+			;;
+			2)
+				:
+			;;
+		esac
+		echo "preferred_aps=( \"${SSID}\" )" >> /etc/conf.d/net
+		echo "associate_order=\"forcepreferredonly\"" >> /etc/conf.d/net
+	fi
+}
+
+write_net_conf() {
+	cd /tmp/setup.opts
+	echo "" > /etc/conf.d/net
+	echo "# This network configuration was written by net-setup" > /etc/conf.d/net
+	DHCP=$(tail -n 1 ${iface}.DHCP)
+	case ${DHCP} in
+		1)
+			echo "config_${iface}=\"dhcp\"" >> /etc/conf.d/net
+		;;
+		2)
+			IP=$(tail -n 1 ${iface}.IP)
+			BROADCAST=$(tail -n 1 ${iface}.BC)
+			NETMASK=$(tail -n 1 ${iface}.NM)
+			GATEWAY=$(tail -n 1 ${iface}.GW)
+			if [ -n "${IP}" -a -n "${BROADCAST}" -a -n "${NETMASK}" ]
+			then
+				echo "config_${iface}=( \"${IP} broadcast ${BROADCAST} netmask ${NETMASK}\" )" >> /etc/conf.d/net
+				if [ -n "${GATEWAY}" ]
+				then
+					echo "routes_${iface}=( \"default via ${GATEWAY}\" )" >> /etc/conf.d/net
+				fi
+			fi
+		;;
+	esac
+}
+
 if [ -f /sbin/livecd-functions.sh ]
 then
 	source /sbin/livecd-functions.sh
@@ -43,15 +228,15 @@ dialog --visit-items --title "Network setup" --menu "This script is designed to 
 WIRED_WIRELESS=$(tail -n 1 ${iface}.WIRED_WIRELESS)
 case ${WIRED_WIRELESS} in
 	1)
-		livecd_config_wireless
-		livecd_config_ip
-		livecd_write_wireless_conf
+		config_wireless
+		config_ip
+		write_wireless_conf
 		;;
 	2)
-		livecd_config_ip
+		config_ip
 		;;
 esac
-livecd_write_net_conf
+write_net_conf
 
 echo "Type \"ifconfig\" to make sure the interface was configured correctly."
 
