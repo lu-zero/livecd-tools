@@ -234,7 +234,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${COLDPLUG} coldplug hotplug)"
 	if yesno "$COLDPLUG" && ! rc-service -e coldplug && ! rc-service -e hotplug
 	then
-		echo firmware hwsetup
+		echo hwsetup
 	fi
 	svcs="${svcs} $(check_svc ${GPM} gpm-pre)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"

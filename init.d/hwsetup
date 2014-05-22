@@ -3,10 +3,6 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
-depend() {
-	need firmware
-}
-
 start() {
 	ebegin "Starting hwsetup"
 	[ -e /etc/sysconfig ] || mkdir -p /etc/sysconfig
