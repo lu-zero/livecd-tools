@@ -116,7 +116,7 @@ config_ip() {
 				--inputbox "Please enter a Broadcast address for ${iface}:" \
 				20 50 "${BC_TEMP}" 2> ${iface}.BC
 			BROADCAST=$(tail -n 1 ${iface}.BC)
-			dialog --visit-items --title "Network mask"
+			dialog --visit-items --title "Network mask" \
 				--inputbox "Please enter a Network Mask for ${iface}:" \
 				20 50 "255.255.255.0" 2> ${iface}.NM
 			NETMASK=$(tail -n 1 ${iface}.NM)
