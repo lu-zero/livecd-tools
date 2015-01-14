@@ -181,7 +181,7 @@ write_wireless_conf() {
 				:
 			;;
 		esac
-		echo "preferred_aps=( \"${SSID}\" )" >> /etc/conf.d/net
+		echo "preferred_aps=\"${SSID}\"" >> /etc/conf.d/net
 		echo "associate_order=\"forcepreferredonly\"" >> /etc/conf.d/net
 	fi
 }
@@ -202,10 +202,10 @@ write_net_conf() {
 			GATEWAY=$(tail -n 1 ${iface}.GW)
 			if [ -n "${IP}" -a -n "${BROADCAST}" -a -n "${NETMASK}" ]
 			then
-				echo "config_${iface}=( \"${IP} broadcast ${BROADCAST} netmask ${NETMASK}\" )" >> /etc/conf.d/net
+				echo "config_${iface}=\"${IP} broadcast ${BROADCAST} netmask ${NETMASK}\"" >> /etc/conf.d/net
 				if [ -n "${GATEWAY}" ]
 				then
-					echo "routes_${iface}=( \"default via ${GATEWAY}\" )" >> /etc/conf.d/net
+					echo "routes_${iface}=\"default via ${GATEWAY}\"" >> /etc/conf.d/net
 				fi
 			fi
 		;;
