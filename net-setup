@@ -1,5 +1,98 @@
 #!/bin/bash
 
+get_ifbus() {
+	local iface=$1
+
+	# Example: ../../../bus/pci (wanted: pci)
+	# Example: ../../../../bus/pci (wanted: pci)
+	# Example: ../../../../../../bus/usb (wanted: usb)
+	local if_bus=$(readlink /sys/class/net/${iface}/device/bus)
+	basename ${if_bus}
+}
+
+get_ifproduct() {
+	local iface=$1
+	local bus=$(get_ifbus ${iface})
+	local if_pciaddr
+	local if_devname
+	local if_usbpath
+	local if_usbmanufacturer
+	local if_usbproduct
+
+	if [[ ${bus} == "pci" ]]
+	then
+		# Example: ../../../devices/pci0000:00/0000:00:0a.0 (wanted: 0000:00:0a.0)
+		# Example: ../../../devices/pci0000:00/0000:00:09.0/0000:01:07.0 (wanted: 0000:01:07.0)
+		if_pciaddr=$(readlink /sys/class/net/${iface}/device)
+		if_pciaddr=$(basename ${if_pciaddr})
+
+		# Example: 00:0a.0 Bridge: nVidia Corporation CK804 Ethernet Controller (rev a3)
+		#  (wanted: nVidia Corporation CK804 Ethernet Controller)
+		if_devname=$(lspci -s ${if_pciaddr})
+		if_devname=${if_devname#*: }
+		if_devname=${if_devname%(rev *)}
+	fi
+
+	if [[ ${bus} == "usb" ]]
+	then
+		if_usbpath=$(readlink /sys/class/net/${iface}/device)
+		if_usbpath=/sys/class/net/${iface}/$(dirname ${if_usbpath})
+		if_usbmanufacturer=$(< ${if_usbpath}/manufacturer)
+		if_usbproduct=$(< ${if_usbpath}/product)
+
+		[[ -n ${if_usbmanufacturer} ]] && if_devname="${if_usbmanufacturer} "
+		[[ -n ${if_usbproduct} ]] && if_devname="${if_devname}${if_usbproduct}"
+	fi
+
+	if [[ ${bus} == "ieee1394" ]]
+	then
+		if_devname="IEEE1394 (FireWire) Network Adapter";
+	fi
+
+	echo ${if_devname}
+}
+
+get_ifdriver() {
+	local iface=$1
+
+	# Example: ../../../bus/pci/drivers/forcedeth (wanted: forcedeth)
+	local if_driver=$(readlink /sys/class/net/${iface}/device/driver)
+	basename ${if_driver}
+}
+
+get_ifmac() {
+	local iface=$1
+
+	# Example: 00:01:6f:e1:7a:06
+	cat /sys/class/net/${iface}/address
+}
+
+get_ifdesc() {
+	local iface=$1
+	desc=$(get_ifproduct ${iface})
+	if [[ -n ${desc} ]]
+	then
+		echo $desc
+		return;
+	fi
+
+	desc=$(get_ifdriver ${iface})
+	if [[ -n ${desc} ]]
+	then
+		echo $desc
+		return;
+	fi
+
+	desc=$(get_ifmac ${iface})
+	if [[ -n ${desc} ]]
+	then
+		echo $desc
+		return;
+	fi
+
+	echo "Unknown"
+}
+
 show_ifmenu() {
 	local old_ifs="${IFS}"
 	local opts
@@ -212,21 +305,17 @@ write_net_conf() {
 	esac
 }
 
-if [ -f /sbin/livecd-functions.sh ]
-then
-	source /sbin/livecd-functions.sh
-else
-	echo "ERROR: /sbin/livecd-functions.sh could not be loaded!"
-	exit 1
-fi
-
 if [ ! -x $(which dialog) ]
 then
 	echo "ERROR: The dialog utility is required for net-setup.  Exiting!"
 	exit 1
 fi
 
-livecd_check_root || exit 1
+if [ "$(whoami)" != "root" ]
+then
+	echo "ERROR: must be root to continue"
+	exit 1
+fi
 
 if [ -z "${1}" ]
 then
