@@ -6,7 +6,7 @@ get_ifbus() {
 	# Example: ../../../bus/pci (wanted: pci)
 	# Example: ../../../../bus/pci (wanted: pci)
 	# Example: ../../../../../../bus/usb (wanted: usb)
-	local if_bus=$(readlink /sys/class/net/${iface}/device/bus)
+	local if_bus=$(readlink /sys/class/net/${iface}/device/subsystem)
 	basename ${if_bus}
 }
 
