@@ -200,32 +200,63 @@ config_ip() {
 			/sbin/dhcpcd -n -t 10 -h $(hostname) ${iface} &
 		;;
 		2)
-			dialog --visit-items --title "IP address" \
-			--inputbox "Please enter an IP address for ${iface}:" \
-			20 50 "192.168.1.1" 2> ${iface}.IP
-			IP=$(tail -n 1 ${iface}.IP)
-			BC_TEMP=$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255
-			dialog --visit-items --title "Broadcast address" \
-				--inputbox "Please enter a Broadcast address for ${iface}:" \
-				20 50 "${BC_TEMP}" 2> ${iface}.BC
-			BROADCAST=$(tail -n 1 ${iface}.BC)
-			dialog --visit-items --title "Network mask" \
-				--inputbox "Please enter a Network Mask for ${iface}:" \
-				20 50 "255.255.255.0" 2> ${iface}.NM
-			NETMASK=$(tail -n 1 ${iface}.NM)
-			dialog --visit-items --title "Gateway" \
-				--inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" \
-				20 50 2> ${iface}.GW
-			GATEWAY=$(tail -n 1 ${iface}.GW)
+
+			dialog --visit-items --title "TCP/IP setup" \
+				--menu "Do you want to use ifconfig (192.168.0.1 255.255.255.0) or iproute2 (192.168.0.1/24) syntax?.  Choose one option:" \
+				20 60 7 1 "Use ifconfig to configure the network" \
+				2 "Use iproute2 to configure the network" 2> ${iface}.SYNTAX
+			SYNTAX=$(tail -n 1 ${iface}.SYNTAX)
+			case ${SYNTAX} in
+				1)
+
+					dialog --visit-items --title "IP address" \
+					--inputbox "Please enter an IP address for ${iface}:" \
+					20 50 "192.168.1.1" 2> ${iface}.IP
+					IP=$(tail -n 1 ${iface}.IP)
+					BC_TEMP=$(echo $IP|cut -d . -f 1).$(echo $IP|cut -d . -f 2).$(echo $IP|cut -d . -f 3).255
+					dialog --visit-items --title "Broadcast address" \
+						--inputbox "Please enter a Broadcast address for ${iface}:" \
+						20 50 "${BC_TEMP}" 2> ${iface}.BC
+					BROADCAST=$(tail -n 1 ${iface}.BC)
+					dialog --visit-items --title "Network mask" \
+						--inputbox "Please enter a Network Mask for ${iface}:" \
+						20 50 "255.255.255.0" 2> ${iface}.NM
+					NETMASK=$(tail -n 1 ${iface}.NM)
+					dialog --visit-items --title "Gateway" \
+						--inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" \
+						20 50 2> ${iface}.GW
+					GATEWAY=$(tail -n 1 ${iface}.GW)
+
+					ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
+
+					if [ -n "${GATEWAY}" ]
+					then
+						route add default gw ${GATEWAY} dev ${iface} netmask 0.0.0.0 metric 1
+					fi
+				;;
+				2)
+
+					dialog --visit-items --title "IP address" \
+					--inputbox "Please enter an IP address for ${iface}:" \
+					20 50 "192.168.1.1/24" 2> ${iface}.IP
+					IP=$(tail -n 1 ${iface}.IP)
+					dialog --visit-items --title "Gateway" \
+						--inputbox "Please enter a Gateway for ${iface} (hit enter for none:)" \
+						20 50 2> ${iface}.GW
+					GATEWAY=$(tail -n 1 ${iface}.GW)
+
+					ip addr add ${IP} dev ${iface}
+
+					if [ -n "${GATEWAY}" ]
+					then
+						ip route add default via ${GATEWAY}
+					fi
+			esac
+
 			dialog --visit-items --title "DNS server"\
 				--inputbox "Please enter a name server to use (hit enter for none:)" \
 				20 50 2> ${iface}.DNS
 			DNS=$(tail -n 1 ${iface}.DNS)
-			ifconfig ${iface} ${IP} broadcast ${BROADCAST} netmask ${NETMASK}
-			if [ -n "${GATEWAY}" ]
-			then
-				route add default gw ${GATEWAY} dev ${iface} netmask 0.0.0.0 metric 1
-			fi
 			if [ -n "${DNS}" ]
 			then
 				dialog --visit-items --title "DNS Search Suffix" \
