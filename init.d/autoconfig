@@ -494,7 +494,7 @@ start() {
 			/etc/conf.d/net
 		for i in `seq 0 4`
 		do
-			echo "config_eth${i}=( \"none\" )" >> /etc/conf.d/net
+			echo "config_eth${i}=\"null\"" >> /etc/conf.d/net
 		done
 		ewarn "Skipping DHCP broadcast ..."
 	fi
