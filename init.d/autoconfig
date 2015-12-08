@@ -132,6 +132,9 @@ get_config() {
 			donet)
 				NET="yes"
 			;;
+			donfs)
+				NFS="yes"
+			;;
 			dopata)
 				PATA="yes"
 			;;
