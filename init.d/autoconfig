@@ -242,7 +242,7 @@ list_services() {
 	svcs="${svcs} $(check_svc ${GPM} gpm-pre)"
 	svcs="${svcs} $(check_svc ${GPM} gpm)"
 	svcs="${svcs} $(check_svc ${IDEDMA} hdparm)"
-	svcs="${svcs} $(check_svc ${NFS} nfsmount)"
+	svcs="${svcs} $(check_svc ${NFS} nfsclient)"
 	svcs="${svcs} $(check_svc ${PASSWD} pwgen)"
 	svcs="${svcs} $(check_svc ${PCMCIA} pcmcia)"
 	svcs="${svcs} $(check_svc ${SSHD} sshd)"
