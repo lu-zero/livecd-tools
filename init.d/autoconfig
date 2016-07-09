@@ -1,4 +1,4 @@
-#!/sbin/runscript
+#!/sbin/openrc-run
 
 # This script is used by Gentoo release media to start certain services and to
 # ensure a sane setup for a CD-based boot.
