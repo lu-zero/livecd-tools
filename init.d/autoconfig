@@ -534,6 +534,7 @@ start() {
 		fi
 		if ! yesno "${PASSWD}"
 		then
+			chmod og-r /proc/cmdline # Try to secure the kernel parameters per bug #610840
 			echo "root:${PASSWORD}" | chpasswd  > /dev/null 2>&1
 		fi
 		if yesno "${SSHD}"
