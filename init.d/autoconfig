@@ -16,7 +16,6 @@ get_config() {
 				COLDPLUG="no"
 				DETECT="no"
 				DMRAID="no"
-				EVMS="no"
 				FIREWIRE="no"
 				GPM="no"
 				LVM="no"
@@ -41,9 +40,6 @@ get_config() {
 			;;
 			nodmraid)
 				DMRAID="no"
-			;;
-			noevms|noevms2)
-				EVMS="no"
 			;;
 			nofirewire)
 				FIREWIRE="no"
@@ -113,9 +109,6 @@ get_config() {
 			;;
 			dodmraid)
 				DMRAID="yes"
-			;;
-			doevms|doevms2)
-				EVMS="yes"
 			;;
 			dofirewire)
 				FIREWIRE="yes"
