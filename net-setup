@@ -7,7 +7,7 @@ get_ifbus() {
 	# Example: ../../../../bus/pci (wanted: pci)
 	# Example: ../../../../../../bus/usb (wanted: usb)
 	local if_bus=$(readlink /sys/class/net/${iface}/device/subsystem)
-	basename ${if_bus}
+	[[ -e "${if_bus}" ]] && basename ${if_bus}
 }
 
 get_ifproduct() {
@@ -57,7 +57,7 @@ get_ifdriver() {
 
 	# Example: ../../../bus/pci/drivers/forcedeth (wanted: forcedeth)
 	local if_driver=$(readlink /sys/class/net/${iface}/device/driver)
-	basename ${if_driver}
+	[[ -e "${if_driver}" ]] && basename ${if_driver}
 }
 
 get_ifmac() {
@@ -98,19 +98,17 @@ show_ifmenu() {
 	local opts
 	IFS="
 "
-	for ifname in $(ifconfig -a | grep "^[^ ]"); do
+	for ifname in $(ifconfig -a | grep "^[^ ]" | cut -d : -f 1); do
 		ifname="${ifname%% *}"
 		[[ ${ifname} == "lo" ]] && continue
+		[[ ${ifname} == "sit0" ]] && continue
 		opts="${opts} ${ifname} '$(get_ifdesc ${ifname})'"
 	done
 	IFS="${old_ifs}"
 
-	if ! eval dialog --visit-items \
+	dialog --visit-items --trim \
 		--menu "Please select the interface that you wish to configure from the list below:" 0 0 0 $opts 2>iface
-	then
-		exit
-	fi
-
+	[[ $? -gt 0 ]] && exit
 	iface=$(< iface)
 }
 
