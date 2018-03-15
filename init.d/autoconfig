@@ -386,22 +386,23 @@ start() {
 	ebegin "Starting autoconfig"
 	echo "0" > /proc/sys/kernel/printk
 	get_config
+
 	local numcpu="$(grep -c '^processor[[:space:]]\+:' /proc/cpuinfo)"
 	eindent
 	ebegin "Setting sane defaults in /etc/portage/make.conf"
-		if [ -f "/etc/portage/make.conf" ] && checkpath -W /etc/portage/make.conf; then
-			if ! grep -q 'EMERGE_DEFAULT_OPTS=.*--jobs' /etc/portage/make.conf; then
-				printf "EMERGE_DEFAULT_OPTS=\"\${EMERGE_DEFAULT_OPTS} --jobs=${numcpu} --load-average=${numcpu}\"\n" >> /etc/portage/make.conf
-			fi
-		elif [ ! -f "/etc/portage/make.conf" ] && [ ! -d "/etc/portage/make.conf" ] && checkpath -W /etc/portage; then
+	if [ -f "/etc/portage/make.conf" ] && checkpath -W /etc/portage/make.conf; then
+		if ! grep -q 'EMERGE_DEFAULT_OPTS=.*--jobs' /etc/portage/make.conf; then
 			printf "EMERGE_DEFAULT_OPTS=\"\${EMERGE_DEFAULT_OPTS} --jobs=${numcpu} --load-average=${numcpu}\"\n" >> /etc/portage/make.conf
-		elif [ -d "/etc/portage/make.conf" ]; then
-			if [ ! -f "/etc/portage/make.conf/livecd-tools-autoconfig" ] && checkpath -W /etc/portage/make.conf/livecd-tools-autoconfig; then
-				printf "EMERGE_DEFAULT_OPTS=\"\${EMERGE_DEFAULT_OPTS} --jobs=${numcpu} --load-average=${numcpu}\"\n" >> /etc/portage/make.conf/livecd-tools-autoconfig
-			fi
-		else
-			false
 		fi
+	elif [ ! -f "/etc/portage/make.conf" ] && [ ! -d "/etc/portage/make.conf" ] && checkpath -W /etc/portage; then
+		printf "EMERGE_DEFAULT_OPTS=\"\${EMERGE_DEFAULT_OPTS} --jobs=${numcpu} --load-average=${numcpu}\"\n" >> /etc/portage/make.conf
+	elif [ -d "/etc/portage/make.conf" ]; then
+		if [ ! -f "/etc/portage/make.conf/livecd-tools-autoconfig" ] && checkpath -W /etc/portage/make.conf/livecd-tools-autoconfig; then
+			printf "EMERGE_DEFAULT_OPTS=\"\${EMERGE_DEFAULT_OPTS} --jobs=${numcpu} --load-average=${numcpu}\"\n" >> /etc/portage/make.conf/livecd-tools-autoconfig
+		fi
+	else
+		false
+	fi
 	eend $? "Unable to write to /etc/portage/make.conf"
 	eoutdent
 
