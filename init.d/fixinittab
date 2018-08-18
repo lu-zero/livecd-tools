@@ -31,7 +31,7 @@ start()
 	sed -i -e '/^b0/ s/^/#/' /etc/inittab
 
 	# SPARC & HPPA console magic
-	if [ "${HOSTTYPE}" = "sparc" -o "${HOSTTYPE}" = "hppa" -o "${HOSTTYPE}" = "ppc64" ]
+	if [ "${HOSTTYPE}" = "sparc" -o "${HOSTTYPE}" = "hppa" ]
 	then
 		# Mount openprom tree for user debugging purposes
 		if [ "${HOSTTYPE}" = "sparc" ]
@@ -69,15 +69,6 @@ start()
 			    done
 			fi
 		fi
-		if [ -c "/dev/hvc0" ]
-		then
-			eindent
-			ebegin "Adding hvc console to inittab ..."
-			echo "s0:12345:respawn:/sbin/agetty -a root 9600 hvc0 vt320" >> /etc/inittab
-			eend $?
-			eoutdent
-		fi
-
 	# The rest...
 	else
 		if [ "${LIVECD_CONSOLE}" = "tty0" -o "${LIVECD_CONSOLE}" = "" ]
@@ -101,6 +92,15 @@ start()
 			eend $?
 			eoutdent
 		fi
+	fi
+
+	if [ -c "/dev/hvc0" -a "${LIVECD_CONSOLE}" = "" ]
+	then
+		eindent
+		ebegin "Adding hvc console to inittab ..."
+		echo "s0:12345:respawn:/sbin/agetty -a root 9600 hvc0 vt320" >> /etc/inittab
+		eend $?
+		eoutdent
 	fi
 
 	# EFI-based machines should automatically hook up their console lines
